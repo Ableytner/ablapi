@@ -1,0 +1,4 @@
+abllib==1.4.3
+flask==3.1.2
+requests==2.32.5
+schedule==1.2.2

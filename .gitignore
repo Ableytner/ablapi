@@ -1,0 +1,11 @@
+*\__pycache__
+*\.pytest_cache
+*\.mypy_cache
+*\.ruff_cache
+*\.vscode
+*\venv*
+*\test_run
+*.pyc
+*.log
+*.egg-info
+.env
