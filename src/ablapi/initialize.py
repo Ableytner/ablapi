@@ -31,8 +31,8 @@ def load_environment_variables() -> None:
 
 
     VolatileStorage["modules_to_load"] = []
-    if "modules" in os.environ:
-        VolatileStorage["modules_to_load"] = os.environ["modules"].replace(", ", " ").replace(",", " ").split(" ")
+    if "MODULES" in os.environ:
+        VolatileStorage["modules_to_load"] = os.environ["MODULES"].replace(", ", " ").replace(",", " ").split(" ")
 
 def initialize_flask_app() -> None:
     """Initialize the flask app"""

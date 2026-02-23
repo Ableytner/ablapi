@@ -1,4 +1,4 @@
 #!/bin/sh
 
 . ./.env
-log_level=debug modules=$modules github_token=$github_token venv/bin/python -m flask --app src/main:run run --debug --no-reload
+LOG_LEVEL=debug MODULES=$MODULES GITHUB_TOKEN=$GITHUB_TOKEN venv/bin/python -m flask --app src/main:run run --debug --no-reload

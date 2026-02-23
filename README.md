@@ -1,35 +1,24 @@
 # ablapi
 
-Ableytners' general-purpose Web API (Application Programming Interface).
+Ableytners' general-purpose REST API.
 
 ## Overview
 
-This project is a collection of many small helper modules that can be used for all kinds of projects.
+This project is a collection of small API (Application Programming Interface) endpoints serving various uses.
 
 It is structured into small submodules, which are all optional and not dependent on each other. Feel free to only use the ones you need.
 
+Each submodule is defined by one python file, which is only loaded if specified in the config. The module may be in a subfolder.
+
 The following submodules are available:
-1. Algorithms (`abllib.alg`)
-2. Errors (`abllib.error`)
-3. File system operations (`abllib.fs`)
-4. Fuzzy matching (`abllib.fuzzy`)
-5. General (`abllib.general`)
-6. Logging (`abllib.log`)
-7. Cleanup on exit (`abllib.onexit`)
-8. Parallel processing (`abllib.pproc`)
-9. Storages (`abllib.storage`)
-10. Function wrappers (`abllib.wrapper`)
+1. hello_world.py (`ablapi.hello_world`)
+1. gtnh.py (`ablapi.gtnh`)
 
 ## Installation
 
-### Github
+### Github container registry
 
-To install the latest development version directly from Github, run the following command:
-```bash
-pip install git+https://github.com/Ableytner/abllib
-```
-
-Additionally, a [wheel](https://peps.python.org/pep-0427/) is added to every [stable release](https://github.com/Ableytner/abllib/releases), which can be manually downloaded and installed.
+TODO
 
 ## Development environment setup
 

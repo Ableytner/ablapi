@@ -3,6 +3,7 @@
 *\.mypy_cache
 *\.ruff_cache
 *\.vscode
+*\requests-cache
 *\venv*
 *\test_run
 *.pyc

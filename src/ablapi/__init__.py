@@ -6,17 +6,25 @@
 import os
 
 from abllib import log, storage
+from abllib.log import LogLevel, get_logger
 
-if "log_level" in os.environ:
-    log_level = log.LogLevel.from_str(os.environ["log_level"])
+if "LOG_LEVEL" in os.environ:
+    log_level = LogLevel.from_str(os.environ["LOG_LEVEL"])
 else:
-    log_level = log.LogLevel.INFO
+    log_level = LogLevel.INFO
 
 log.initialize(log_level)
 log.add_console_handler()
 log.add_file_handler("latest.log")
 
+# quiet down other loggers
+get_logger("urllib3").setLevel(LogLevel.INFO.value)
+get_logger("requests_cache").setLevel(LogLevel.INFO.value)
+
 storage.initialize()
+
+# setup requests cache dir
+os.makedirs("requests-cache", exist_ok=True)
 
 from ablapi import initialize, util
 

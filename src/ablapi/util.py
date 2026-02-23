@@ -7,6 +7,7 @@ import struct
 import sys
 import termios
 import traceback
+from enum import Enum
 from typing import Any, Callable
 
 from abllib import CacheStorage, VolatileStorage, get_logger
@@ -15,7 +16,21 @@ from flask import Flask
 
 logger = get_logger("util")
 
-def register_endpoint(location: str, callback: Callable[[], Any]) -> None:
+class BetterEnum(Enum):
+    """A better enum base class that allows for more comparisons"""
+
+    def __eq__(self, other: object) -> bool:
+        return self is other or self.value == other
+
+    def __ne__(self, other: object) -> bool:
+        return self is not other and self.value != other
+
+    # for more details look here:
+    # https://stackoverflow.com/a/72664895/15436169
+    def __hash__(self) -> int:
+        return hash(self.value)
+
+def register_endpoint(location: str, callback: Callable) -> None:
     """Register a callback to a location"""
 
     if not isinstance(location, str):

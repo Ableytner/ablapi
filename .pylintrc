@@ -28,8 +28,10 @@ disable=too-many-arguments,
         too-many-positional-arguments,
         logging-fstring-interpolation,
         too-many-branches,
-        too-many-locals
+        too-many-locals,
+        too-many-return-statements,
+        broad-exception-caught
 
 [FORMAT]
 
-max-line-length=120
+max-line-length=130
