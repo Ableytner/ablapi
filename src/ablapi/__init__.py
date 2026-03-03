@@ -1,7 +1,7 @@
 """Imports all submodules"""
 
 # pylint: disable=wrong-import-position
-# ruff: noqa: E402
+# ruff: noqa: E402, F401
 
 import os
 
@@ -15,7 +15,6 @@ else:
 
 log.initialize(log_level)
 log.add_console_handler()
-log.add_file_handler("latest.log")
 
 # quiet down other loggers
 get_logger("urllib3").setLevel(LogLevel.INFO.value)
@@ -26,9 +25,4 @@ storage.initialize()
 # setup requests cache dir
 os.makedirs("requests-cache", exist_ok=True)
 
-from ablapi import initialize, util
-
-__exports__ = [
-    initialize,
-    util
-]
+from ablapi.initialize import run

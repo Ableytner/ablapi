@@ -2,11 +2,11 @@ services:
   api:
     container_name: ablapi
     hostname: ablapi
-    image: ghcr.io/ableytner/ablapi:dev
+    build:
+      context: .
+#    image: ghcr.io/ableytner/ablapi:dev
     ports:
       - 9219:8000
-    volumes:
-      - ./server:/data
     environment:
       MODULES: "gtnh,hello_world"
       GITHUB_TOKEN: ${GITHUB_TOKEN}

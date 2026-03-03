@@ -3,12 +3,11 @@
 import re
 
 from abllib import VolatileStorage, get_logger
-
-from ablapi.util import BetterEnum
+from abllib.enum import Enum
 
 logger = get_logger("gtnh-helper")
 
-class FetchResult(BetterEnum):
+class FetchResult(Enum):
     """All possible fetch results"""
 
     SUCCESS = 1
@@ -79,7 +78,6 @@ def fetch_specific_daily(target_daily: int) -> FetchResult:
 
         offset = 0
         while offset < len(runs["workflow_runs"]):
-            logger.info(f"looking at item {seen_items + 1}")
             current_run = runs["workflow_runs"][offset]
 
             if current_run["run_number"] == target_daily:

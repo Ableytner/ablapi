@@ -7,7 +7,6 @@ import struct
 import sys
 import termios
 import traceback
-from enum import Enum
 from typing import Any, Callable
 
 from abllib import CacheStorage, VolatileStorage, get_logger
@@ -15,20 +14,6 @@ from abllib.error import NotInitializedError, WrongTypeError
 from flask import Flask
 
 logger = get_logger("util")
-
-class BetterEnum(Enum):
-    """A better enum base class that allows for more comparisons"""
-
-    def __eq__(self, other: object) -> bool:
-        return self is other or self.value == other
-
-    def __ne__(self, other: object) -> bool:
-        return self is not other and self.value != other
-
-    # for more details look here:
-    # https://stackoverflow.com/a/72664895/15436169
-    def __hash__(self) -> int:
-        return hash(self.value)
 
 def register_endpoint(location: str, callback: Callable) -> None:
     """Register a callback to a location"""
@@ -143,16 +128,21 @@ def get_terminal_width() -> int:
     if "terminal_width" in CacheStorage:
         return CacheStorage["terminal_width"]
 
-    # pylint: disable-next=unused-variable
-    h, w, hp, wp = struct.unpack(
-        'HHHH',
-        fcntl.ioctl(
-            sys.stdout.fileno(),
-            termios.TIOCGWINSZ,
-            struct.pack('HHHH', 0, 0, 0, 0)
+    try:
+        # pylint: disable-next=unused-variable
+        h, w, hp, wp = struct.unpack(
+            'HHHH',
+            fcntl.ioctl(
+                sys.stdout.fileno(),
+                termios.TIOCGWINSZ,
+                struct.pack('HHHH', 0, 0, 0, 0)
+            )
         )
-    )
-    w -= 1
+        w -= 1
+    except OSError:
+        # terminal width could not be detected (e.g. when ran in Docker container)
+        w = 100
+
     CacheStorage["terminal_width"] = w
 
     return w
