@@ -31,5 +31,7 @@ jobs:
         pip install pytest
         if [ -f requirements.txt ]; then pip install --upgrade -r requirements.txt; fi
     - name: Run tests with pytest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         pytest src --skip-linting
