@@ -20,20 +20,22 @@ if "GITHUB_TOKEN" not in os.environ:
     raise KeyNotFoundError("Environment variable 'GITHUB_TOKEN' isn't set")
 VolatileStorage["gtnh.github_token"] = os.environ["GITHUB_TOKEN"]
 
-session = CachedSession("requests-cache/gtnh-github", expire_after=60 * 5)
-session.headers = {
+headers: dict[str, str | bytes] = {
     "Accept": "application/vnd.github+json",
     "Accept-Charset": "UTF-8",
     "Authorization": f"Bearer {VolatileStorage['gtnh.github_token']}",
     "X-GitHub-Api-Version": "2022-11-28"
 }
+
+session = CachedSession("requests-cache/gtnh-github", expire_after=60 * 5)
+session.headers = headers
 VolatileStorage["gtnh.session"] = session
 
 # test github token (doesn't actually test token, as it is no longer required here)
 session_test_response = requests.get(
     "https://api.github.com/repos/GTNewHorizons/DreamAssemblerXXL/actions/workflows/daily-modpack-build.yml/runs",
     params={"per_page": 1},
-    headers=session.headers,
+    headers=headers,
     timeout=10
 )
 assert session_test_response.ok
