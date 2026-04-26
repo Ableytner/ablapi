@@ -4,6 +4,7 @@ import os
 import re
 from time import sleep
 
+import requests
 from abllib import VolatileStorage, get_logger
 from abllib.error import KeyNotFoundError
 from abllib.pproc import WorkerThread
@@ -27,6 +28,16 @@ session.headers = {
     "X-GitHub-Api-Version": "2022-11-28"
 }
 VolatileStorage["gtnh.session"] = session
+
+# test github token (doesn't actually test token, as it is no longer required here)
+session_test_response = requests.get(
+    "https://api.github.com/repos/GTNewHorizons/DreamAssemblerXXL/actions/workflows/daily-modpack-build.yml/runs",
+    params={"per_page": 1},
+    headers=session.headers,
+    timeout=10
+)
+assert session_test_response.ok
+assert "workflow_runs" in session_test_response.json()
 
 def daily_version(version: str):
     """Endpoint for fetching a specific daily GTNH version"""
@@ -102,11 +113,13 @@ def info_getter_func():
 
     scheduler = Scheduler()
 
-    helper.fetch_newest_daily()
+    assert helper.fetch_newest_daily() == helper.FetchResult.SUCCESS
     scheduler.every().hour.at("13:00").do(helper.fetch_newest_daily)
 
-    helper.fetch_newest_stable()
+    assert helper.fetch_newest_stable() == helper.FetchResult.SUCCESS
     scheduler.every().hour.at("13:00").do(helper.fetch_newest_stable)
+
+    logger.info("GTNH info getter thread entering loop")
 
     while True:
         scheduler.run_pending()
