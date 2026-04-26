@@ -9,7 +9,7 @@ from abllib import log, storage
 from abllib.log import LogLevel, get_logger
 
 if "LOG_LEVEL" in os.environ:
-    log_level = LogLevel.from_str(os.environ["LOG_LEVEL"])
+    log_level = LogLevel.from_str(os.environ["LOG_LEVEL"].strip())
 else:
     log_level = LogLevel.INFO
 

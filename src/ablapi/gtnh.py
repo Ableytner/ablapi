@@ -18,7 +18,7 @@ logger = get_logger("gtnh")
 
 if "GITHUB_TOKEN" not in os.environ:
     raise KeyNotFoundError("Environment variable 'GITHUB_TOKEN' isn't set")
-VolatileStorage["gtnh.github_token"] = os.environ["GITHUB_TOKEN"]
+VolatileStorage["gtnh.github_token"] = os.environ["GITHUB_TOKEN"].strip()
 
 headers: dict[str, str | bytes] = {
     "Accept": "application/vnd.github+json",
