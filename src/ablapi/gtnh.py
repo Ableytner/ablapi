@@ -32,6 +32,7 @@ def daily_version(version: str):
     """Endpoint for fetching a specific daily GTNH version"""
 
     if version == "latest":
+        _wait_for_latest_daily(60)
         return VolatileStorage["gtnh.daily.latest"]
 
     try:
@@ -39,7 +40,7 @@ def daily_version(version: str):
     except Exception:
         return f"Invalid version '{version}', needs to be a number", 400
 
-    _wait_for_daily(30)
+    _wait_for_latest_daily(30)
 
     newest_daily_version = VolatileStorage["gtnh.daily.latest.run_number"]
     if version_int > newest_daily_version:
@@ -83,7 +84,7 @@ def stable_version(version: str):
 
     return "Internal error"
 
-def _wait_for_daily(seconds: float) -> None:
+def _wait_for_latest_daily(seconds: float) -> None:
     """Wait for at most `seconds` seconds until gtnh.daily.latest is set"""
     seconds_passed = 0.0
 
