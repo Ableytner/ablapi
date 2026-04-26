@@ -4,6 +4,7 @@ import re
 
 from abllib import VolatileStorage, get_logger
 from abllib.enum import Enum
+from requests_cache import CachedSession
 
 logger = get_logger("gtnh-helper")
 
@@ -16,7 +17,7 @@ class FetchResult(Enum):
 def fetch_newest_daily() -> FetchResult:
     """Fetch data for newest daily version"""
 
-    session = VolatileStorage["gtnh.session"]
+    session: CachedSession = VolatileStorage["gtnh.session"]
 
     total_items = session.get(
         "https://api.github.com/repos/GTNewHorizons/DreamAssemblerXXL/actions/workflows/daily-modpack-build.yml/runs",
@@ -58,7 +59,7 @@ def fetch_newest_daily() -> FetchResult:
 def fetch_specific_daily(target_daily: int) -> FetchResult:
     """Fetch data for newest daily version"""
 
-    session = VolatileStorage["gtnh.session"]
+    session: CachedSession = VolatileStorage["gtnh.session"]
 
     total_items = session.get(
         "https://api.github.com/repos/GTNewHorizons/DreamAssemblerXXL/actions/workflows/daily-modpack-build.yml/runs",
@@ -100,7 +101,7 @@ def fetch_specific_daily(target_daily: int) -> FetchResult:
 def fetch_newest_stable() -> FetchResult:
     """Fetch data for newest stable version"""
 
-    session = VolatileStorage["gtnh.session"]
+    session: CachedSession = VolatileStorage["gtnh.session"]
 
     releases_json = session.get(
         "https://downloads.gtnewhorizons.com/versions.json",
@@ -127,7 +128,7 @@ def fetch_newest_stable() -> FetchResult:
 def fetch_specific_stable(target_stable: str) -> FetchResult:
     """Fetch data for specific stable version"""
 
-    session = VolatileStorage["gtnh.session"]
+    session: CachedSession = VolatileStorage["gtnh.session"]
 
     releases_json = session.get(
         "https://downloads.gtnewhorizons.com/versions.json",

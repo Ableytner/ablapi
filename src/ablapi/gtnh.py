@@ -39,6 +39,8 @@ def daily_version(version: str):
     except Exception:
         return f"Invalid version '{version}', needs to be a number", 400
 
+    _wait_for_daily(30)
+
     newest_daily_version = VolatileStorage["gtnh.daily.latest.run_number"]
     if version_int > newest_daily_version:
         return f"Invalid version '{version}', needs to be <= {newest_daily_version}", 400
@@ -80,6 +82,17 @@ def stable_version(version: str):
             return f"Stable version '{version}' wasn't found"
 
     return "Internal error"
+
+def _wait_for_daily(seconds: float) -> None:
+    """Wait for at most `seconds` seconds until gtnh.daily.latest is set"""
+    seconds_passed = 0.0
+
+    while "gtnh.daily.latest" not in VolatileStorage and seconds_passed < seconds:
+        sleep(0.1)
+        seconds_passed += 0.1
+
+    if seconds_passed >= seconds:
+        raise TimeoutError("Timed out waiting for latest daily version fetch")
 
 def info_getter_func():
     """Fetch all data this module needs in the background"""

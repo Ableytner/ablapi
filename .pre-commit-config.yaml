@@ -36,3 +36,28 @@ repos:
     args:
     - -d import-error
     - -sn
+- repo: https://github.com/pre-commit/mirrors-mypy
+  # pinned due to
+  # https://github.com/python/typeshed/pull/9771 and
+  # https://github.com/python/mypy/issues/15257 for DaskCollection.__dask_scheduler__
+  rev: v1.15.0
+  hooks:
+  - id: mypy
+    # Override default --ignore-missing-imports
+    # Use pyproject.toml if possible instead of adding command line parameters here
+    args: [--warn-unused-configs]
+    additional_dependencies:
+    # Type stubs
+    - types-docutils
+    - types-PyYAML
+    - types-psutil
+    - types-requests
+    - types-setuptools
+    # Typed libraries
+    - numpy
+    - pytest
+    - abllib
+    - flask
+    - requests_cache
+    - schedule
+    files: ^src/ablapi/

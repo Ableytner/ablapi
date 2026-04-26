@@ -1,0 +1,112 @@
+name: Release tagged image
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_number:
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  pylint:
+    strategy:
+      matrix:
+        python-version: ["3.14"]
+    uses: ./.github/workflows/define-pylint.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+    secrets: inherit
+
+  pytest:
+    strategy:
+      matrix:
+        python-version: ["3.14"]
+    uses: ./.github/workflows/define-pytest.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+    secrets: inherit
+
+  build:
+    uses: ./.github/workflows/define-build-image.yml
+    secrets: inherit
+
+  tag:
+    runs-on: self-hosted
+    steps:
+    - uses: mukunku/tag-exists-action@v1.6.0
+      id: check-tag
+      with:
+        tag: ${{ github.event.inputs.version_number }}
+    - name: Fail if tag exists
+      if: steps.check-tag.outputs.exists == 'true'
+      uses: actions/github-script@v3
+      with:
+        # https://timheuer.com/blog/manually-force-a-failure-in-github-action-step/#evaluating-your-condition-and-failing-the-step-manually
+        script: |
+            core.setFailed("Tag ${{ github.event.inputs.version_number }} already exists!")
+    - name: Print tag if it doesn't exist
+      if: steps.check-tag.outputs.exists == 'false'
+      run: |
+        echo "Tag ${{ github.event.inputs.version_number }} doesn't yet exist and can be created"
+
+  push:
+    needs: [pylint, pytest, build, tag]
+    runs-on: [self-hosted, linux]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: lowercase github.repository
+      run: |
+        echo "IMAGE_NAME=`echo ${{github.repository}} | tr '[:upper:]' '[:lower:]'`" >>${GITHUB_ENV}
+    - name: Download cached docker image
+      run: |
+        curl --fail-with-body -X GET http://192.168.0.11:25000/attachments/ablapi/1/image.tar -o /tmp/image.tar
+    - name: Load image
+      run: |
+        docker load --input /tmp/image.tar
+    - name: Push
+      run: |
+        docker tag ${{ env.IMAGE_NAME }}:latest ghcr.io/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version_number }}
+        docker push ghcr.io/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version_number }}
+        docker tag ghcr.io/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version_number }} ghcr.io/${{ env.IMAGE_NAME }}:latest
+        docker push ghcr.io/${{ env.IMAGE_NAME }}:latest
+    - name: Remove local image
+      if: always()
+      run: |
+        docker image rm ${{ env.IMAGE_NAME }}
+    - name: Remove cached docker image
+      if: always()
+      run: |
+        curl --fail-with-body -X DELETE http://192.168.0.11:25000/attachments/ablapi/1/image.tar
+
+  release:
+    needs: [push]
+    runs-on: [self-hosted, linux]
+    permissions:
+      contents: write
+    steps:
+    - name: Create body.md
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh api --method POST -H "Accept: application/vnd.github+json" \
+          "/repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
+          -f tag_name="${{ github.event.inputs.version_number }}" \
+          --jq ".body" \
+          > body.md
+    - name: Create new release
+      uses: ncipollo/release-action@v1
+      with:
+        bodyFile: "body.md"
+        tag: ${{ github.event.inputs.version_number }}
+        token: ${{ secrets.GITHUB_TOKEN }}
