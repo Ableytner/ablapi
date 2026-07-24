@@ -7,6 +7,7 @@ from dataclasses import asdict, dataclass
 from abllib import VolatileStorage, get_logger
 from abllib.enum import Enum
 from abllib.error import WrongTypeError
+from flask import Response
 from requests_cache import CachedSession
 
 from ablapi.util import send_error
@@ -52,10 +53,10 @@ class DailyVersion():
     run_url_html: str
     downloads: DownloadUrls | None
 
-    def serialize(self) -> str:
-        """Return a json string of the current object"""
+    def serialize(self) -> Response:
+        """Return a json Response of the current object"""
 
-        return json.dumps(asdict(self))
+        return Response(json.dumps(asdict(self)), mimetype="application/json")
 
 @dataclass
 class StableVersion():
@@ -64,10 +65,10 @@ class StableVersion():
     version: str
     downloads: DownloadUrls
 
-    def serialize(self) -> str:
-        """Return a json string of the current object"""
+    def serialize(self) -> Response:
+        """Return a json Response of the current object"""
 
-        return json.dumps(asdict(self))
+        return Response(json.dumps(asdict(self)), mimetype="application/json")
 
 def fetch_newest_daily() -> FetchResult:
     """Fetch data for newest daily version"""

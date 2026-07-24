@@ -9,7 +9,7 @@ logger = log.get_logger("pylint")
 def test_daily_specific_v1(client: FlaskClient):
     """Checks if fetching a specific daily version works"""
 
-    result = client.get("/gtnh/daily/10").get_json(force=True)
+    result = client.get("/gtnh/daily/10").json
 
     assert isinstance(result, dict)
     assert result["run_number"] == 10
@@ -20,7 +20,7 @@ def test_daily_specific_v1(client: FlaskClient):
 def test_daily_specific_v2(client: FlaskClient):
     """Checks if fetching a specific daily version works"""
 
-    result = client.get("/gtnh/daily/501").get_json(force=True)
+    result = client.get("/gtnh/daily/501").json
 
     assert isinstance(result, dict)
     assert result["run_number"] == 501
@@ -31,7 +31,7 @@ def test_daily_specific_v2(client: FlaskClient):
 def test_daily_specific_v3(client: FlaskClient):
     """Checks if fetching a specific daily version works"""
 
-    result = client.get("/gtnh/daily/639").get_json(force=True)
+    result = client.get("/gtnh/daily/639").json
 
     assert isinstance(result, dict)
     assert result["run_number"] == 639
@@ -42,7 +42,7 @@ def test_daily_specific_v3(client: FlaskClient):
 def test_daily_failed(client: FlaskClient):
     """Checks if fetching a specific daily version works"""
 
-    result = client.get("/gtnh/daily/500").get_json(force=True)
+    result = client.get("/gtnh/daily/500").json
 
     assert isinstance(result, dict)
     assert result["run_number"] == 500
