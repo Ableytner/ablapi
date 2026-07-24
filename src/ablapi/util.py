@@ -11,6 +11,7 @@ from typing import Any, Callable
 
 from abllib import CacheStorage, VolatileStorage, get_logger
 from abllib.error import NotInitializedError, WrongTypeError
+from abllib.pproc import WorkerThread
 from flask import Flask
 
 logger = get_logger("util")
@@ -25,12 +26,7 @@ def register_endpoint(location: str, callback: Callable) -> None:
     if not callable(callable):
         raise WrongTypeError.with_values(callback, Callable[[], Any])
 
-    traces = traceback.format_list(traceback.extract_stack())
-    traces.reverse()
-    module_line = traces[1].split("\n")[0].strip()
-    module_filename = os.path.basename(module_line) \
-                          .split("\"", maxsplit=1)[0] \
-                          .split(".", maxsplit=1)[0]
+    module_filename = _get_module_name()
 
     if f"endpoints.{module_filename}" not in VolatileStorage:
         VolatileStorage[f"endpoints.{module_filename}"] = []
@@ -41,6 +37,24 @@ def register_endpoint(location: str, callback: Callable) -> None:
     ))
 
     logger.debug(f"Registered endpoint for {module_filename}: {location}")
+
+def register_worker(name: str, callback: Callable) -> None:
+    """Register a callback to be run as a daemon thread"""
+
+    if not callable(callable):
+        raise WrongTypeError.with_values(callback, Callable[[], Any])
+
+    module_filename = _get_module_name()
+
+    if f"workers.{module_filename}" not in VolatileStorage:
+        VolatileStorage[f"workers.{module_filename}"] = []
+
+    VolatileStorage[f"workers.{module_filename}"].append((
+        name,
+        callback
+    ))
+
+    logger.debug(f"Registered worker for {module_filename}: {name}")
 
 def load_modules() -> None:
     """Load all registered modules"""
@@ -76,6 +90,10 @@ def load_modules() -> None:
         for location, callback in VolatileStorage.get(f"endpoints.{module_to_load}", []):
             logger.info(f"Loading endpoint: {location}")
             app.route(location)(callback)
+            endpoints_counter += 1
+        for name, callback in VolatileStorage.get(f"workers.{module_to_load}", []):
+            logger.info(f"Starting worker: {name}")
+            WorkerThread(target=_wrap_worker_callback(name, callback), name=name, daemon=True).start()
             endpoints_counter += 1
 
         modules_counter += 1
@@ -159,3 +177,28 @@ def get_terminal_width_for_logging() -> int:
     sample_output = "[2026-01-07 22:27:39] [INFO    ] util: "
 
     return total_width - len(sample_output)
+
+def send_error(module: str, msg: str) -> None:
+    """Notify the owner that something went seriously wrong"""
+
+    logger.error(f"{module}: sending error: {msg}")
+    # TODO: send error as discord msg or email
+
+def _get_module_name() -> str:
+    traces = traceback.format_list(traceback.extract_stack())
+    traces.reverse()
+    module_line = traces[2].split("\n")[0].strip()
+    module_filename = os.path.basename(module_line) \
+                          .split("\"", maxsplit=1)[0] \
+                          .split(".", maxsplit=1)[0]
+    return module_filename
+
+def _wrap_worker_callback(name: str, callback: Callable) -> Callable:
+    def inner():
+        try:
+            callback()
+            logger.info(f"Worker {name} exited normally")
+        except Exception:
+            logger.exception(f"Worker {name} exited with exception")
+
+    return inner

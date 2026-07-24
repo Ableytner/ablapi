@@ -1,7 +1,7 @@
 """Pytest fixtures"""
 
 import pytest
-from abllib import log
+from abllib import VolatileStorage, log
 
 from ablapi import initialize
 
@@ -13,8 +13,18 @@ logger = log.get_logger("test")
 def setup():
     """Setup everything"""
 
-    initialize.initialize_flask_app()
-    # doesn't actually run, just sets up environment
     initialize.run()
 
     yield None
+
+@pytest.fixture()
+def client():
+    """Return a test client"""
+
+    return VolatileStorage["app"].test_client()
+
+@pytest.fixture()
+def runner():
+    """Return a test cli runner"""
+
+    return VolatileStorage["app"].test_cli_runner()

@@ -2,6 +2,7 @@
 
 from ablapi.util import register_endpoint
 
+
 def heartbeat():
     """Return a heartbeat"""
 

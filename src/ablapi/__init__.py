@@ -13,7 +13,7 @@ if "LOG_LEVEL" in os.environ:
 else:
     log_level = LogLevel.INFO
 
-log.initialize(log_level)
+log.initialize(log_level.value)
 log.add_console_handler()
 
 # quiet down other loggers

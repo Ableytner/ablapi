@@ -29,4 +29,4 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_pylint)
 
 # pylint: disable-next=unused-wildcard-import, wildcard-import, wrong-import-order
-from test.fixtures import *
+from test.fixtures import *  # noqa

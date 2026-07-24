@@ -7,12 +7,12 @@ from time import sleep
 import requests
 from abllib import VolatileStorage, get_logger
 from abllib.error import KeyNotFoundError
-from abllib.pproc import WorkerThread
 from requests_cache import CachedSession
 from schedule import Scheduler
 
 import ablapi.gtnh_helper as helper
-from ablapi.util import register_endpoint
+from ablapi.gtnh_helper import DailyVersion, FetchResult
+from ablapi.util import register_endpoint, register_worker
 
 logger = get_logger("gtnh")
 
@@ -31,22 +31,12 @@ session = CachedSession("requests-cache/gtnh-github", expire_after=60 * 5)
 session.headers = headers
 VolatileStorage["gtnh.session"] = session
 
-# test github token (doesn't actually test token, as it is no longer required here)
-session_test_response = requests.get(
-    "https://api.github.com/repos/GTNewHorizons/DreamAssemblerXXL/actions/workflows/daily-modpack-build.yml/runs",
-    params={"per_page": 1},
-    headers=headers,
-    timeout=10
-)
-assert session_test_response.ok
-assert "workflow_runs" in session_test_response.json()
-
 def daily_version(version: str):
     """Endpoint for fetching a specific daily GTNH version"""
 
     if version == "latest":
         _wait_for_latest_daily(60)
-        return VolatileStorage["gtnh.daily.latest"]
+        return VolatileStorage["gtnh.daily.latest"].serialize()
 
     try:
         version_int = int(version)
@@ -55,9 +45,9 @@ def daily_version(version: str):
 
     _wait_for_latest_daily(30)
 
-    newest_daily_version = VolatileStorage["gtnh.daily.latest.run_number"]
-    if version_int > newest_daily_version:
-        return f"Invalid version '{version}', needs to be <= {newest_daily_version}", 400
+    newest_daily_version: DailyVersion = VolatileStorage["gtnh.daily.latest"]
+    if version_int > newest_daily_version.run_number:
+        return f"Invalid version '{version}', needs to be <= {newest_daily_version.run_number}", 400
 
     try:
         fetch_result = helper.fetch_specific_daily(version_int)
@@ -66,9 +56,9 @@ def daily_version(version: str):
         return "Internal error"
 
     match fetch_result:
-        case helper.FetchResult.SUCCESS:
-            return VolatileStorage[f"gtnh.daily.{version}"]
-        case helper.FetchResult.NOT_FOUND:
+        case FetchResult.SUCCESS:
+            return VolatileStorage[f"gtnh.daily.{version}"].serialize()
+        case FetchResult.NOT_FOUND:
             return f"Daily version '{version}' wasn't found"
 
     return "Internal error"
@@ -77,7 +67,8 @@ def stable_version(version: str):
     """Endpoint for fetching a specific stable GTNH version"""
 
     if version == "latest":
-        return VolatileStorage["gtnh.stable.latest"]
+        _wait_for_latest_stable(30)
+        return VolatileStorage["gtnh.stable.latest"].serialize()
 
     match = re.search(r"(\d+\.\d+\.\d+)", version)
     if match is None:
@@ -90,9 +81,9 @@ def stable_version(version: str):
         return "Internal error"
 
     match fetch_result:
-        case helper.FetchResult.SUCCESS:
-            return VolatileStorage[f"gtnh.stable.{version}"]
-        case helper.FetchResult.NOT_FOUND:
+        case FetchResult.SUCCESS:
+            return VolatileStorage[f"gtnh.stable.{version}"].serialize()
+        case FetchResult.NOT_FOUND:
             return f"Stable version '{version}' wasn't found"
 
     return "Internal error"
@@ -108,17 +99,38 @@ def _wait_for_latest_daily(seconds: float) -> None:
     if seconds_passed >= seconds:
         raise TimeoutError("Timed out waiting for latest daily version fetch")
 
+def _wait_for_latest_stable(seconds: float) -> None:
+    """Wait for at most `seconds` seconds until gtnh.stable.latest is set"""
+    seconds_passed = 0.0
+
+    while "gtnh.stable.latest" not in VolatileStorage and seconds_passed < seconds:
+        sleep(0.1)
+        seconds_passed += 0.1
+
+    if seconds_passed >= seconds:
+        raise TimeoutError("Timed out waiting for latest stable version fetch")
+
 def info_getter_func():
     """Fetch all data this module needs in the background"""
 
     logger.info("GTNH info getter thread started!")
 
+    # test github token (doesn't actually test token, as it is no longer required here)
+    session_test_response = requests.get(
+        "https://api.github.com/repos/GTNewHorizons/DreamAssemblerXXL/actions/workflows/daily-modpack-build.yml/runs",
+        params={"per_page": 1},
+        headers=headers,
+        timeout=10
+    )
+    assert session_test_response.ok
+    assert "workflow_runs" in session_test_response.json()
+
     scheduler = Scheduler()
 
-    assert helper.fetch_newest_daily() == helper.FetchResult.SUCCESS
+    assert helper.fetch_newest_daily() == FetchResult.SUCCESS
     scheduler.every().hour.at("13:00").do(helper.fetch_newest_daily)
 
-    assert helper.fetch_newest_stable() == helper.FetchResult.SUCCESS
+    assert helper.fetch_newest_stable() == FetchResult.SUCCESS
     scheduler.every().hour.at("13:00").do(helper.fetch_newest_stable)
 
     logger.info("GTNH info getter thread entering loop")
@@ -129,6 +141,4 @@ def info_getter_func():
 
 register_endpoint("/gtnh/daily/<version>", daily_version)
 register_endpoint("/gtnh/stable/<version>", stable_version)
-
-info_getter_thread = WorkerThread(target=info_getter_func, daemon=True)
-info_getter_thread.start()
+register_worker("info_getter", info_getter_func)
