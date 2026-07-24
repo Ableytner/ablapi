@@ -33,5 +33,7 @@ jobs:
     - name: Run tests with pytest
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        LOG_LEVEL: debug
+        MODULES: gtnh,hello_world,healthz
       run: |
         pytest src --skip-linting
