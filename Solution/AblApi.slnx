@@ -1,0 +1,23 @@
+<Solution>
+  <Folder Name="/Info, Build, Repo/">
+    <File Path="../.github/workflows/delete-untagged-images.yml" />
+    <File Path="../.github/workflows/release-tagged-image.yml" />
+    <File Path="../.github/workflows/run-tests.yml" />
+  </Folder>
+  <Folder Name="/Info, Build, Repo/templates/">
+    <File Path="../.github/workflows/templates/define-build-image.yml" />
+    <File Path="../.github/workflows/templates/define-pylint.yml" />
+    <File Path="../.github/workflows/templates/define-pytest.yml" />
+  </Folder>
+  <Folder Name="/Source/" />
+  <Folder Name="/Source/Api/">
+    <Project Path="Source/AblApi.Common/AblApi.Common.csproj" Id="a3b95698-984f-4361-823d-3d8a5d0bd9d0" />
+    <Project Path="Source/AblApi.Core/AblApi.Core.csproj" Id="88c6e78c-aa17-4e6d-a72c-688a5bdc7663" />
+    <Project Path="Source/AblApi.GTNH/AblApi.GTNH.csproj" Id="1e10d3a8-879d-4c5f-b505-35750adafa4b" />
+    <Project Path="Source/AblApi.Api/AblApi.Api.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/Integration.Api/Integration.Api.csproj" />
+    <Project Path="Tests/Unit.Api/Unit.Api.csproj" />
+  </Folder>
+</Solution>

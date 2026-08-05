@@ -10,3 +10,5 @@
 *.log
 *.egg-info
 .env
+.vscode
+.vs
