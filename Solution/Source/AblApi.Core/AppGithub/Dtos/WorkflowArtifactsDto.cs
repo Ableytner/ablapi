@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AblApi.Core.AppGithubApi.Dtos;
+namespace AblApi.Core.AppGithub.Dtos;
 
 public class WorkflowArtifactsDto
 {

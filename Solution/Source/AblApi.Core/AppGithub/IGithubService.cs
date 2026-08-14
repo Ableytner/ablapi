@@ -1,8 +1,8 @@
-﻿using AblApi.Core.AppGithubApi.Dtos;
+﻿using AblApi.Core.AppGithub.Dtos;
 
-namespace AblApi.Core.AppGithubApi;
+namespace AblApi.Core.AppGithub;
 
-public interface IGithubApiService
+public interface IGithubService
 {
     public bool SuccessFilter(WorkflowRunDto run);
 

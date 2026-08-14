@@ -1,15 +1,15 @@
-﻿using AblApi.Core.AppGithubApi.Dtos;
+﻿using AblApi.Core.AppGithub.Dtos;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace AblApi.Core.AppGithubApi;
+namespace AblApi.Core.AppGithub;
 
-public class GithubApiService(ILogger<GithubApiService> logger, IHttpClientFactory httpClientFactory) : IGithubApiService
+public class GithubService(ILogger<GithubService> logger, IHttpClientFactory httpClientFactory) : IGithubService
 {
     private readonly int _workflowsPerPage = 100;
 
-    private readonly ILogger<GithubApiService> _logger = logger;
-    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("GithubApi");
+    private readonly ILogger<GithubService> _logger = logger;
+    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("Github");
 
     public bool SuccessFilter(WorkflowRunDto run) => run.Conclusion == "success";
 

@@ -1,16 +1,16 @@
-﻿using AblApi.Core.AppGithubApi;
-using AblApi.Core.AppGithubApi.Dtos;
+﻿using AblApi.Core.AppGithub;
+using AblApi.Core.AppGithub.Dtos;
 using AblApi.GTNH.DailyVersionSchemas;
 using AblApi.GTNH.Dtos;
 using Microsoft.Extensions.Logging;
 
 namespace AblApi.GTNH;
 
-public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfiguration, IGithubApiService githubApiService) : IGTNHManager
+public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfiguration, IGithubService githubApiService) : IGTNHManager
 {
     private readonly ILogger<GTNHManager> _logger = logger;
     private readonly GTNHAppSettings _gtnhConfiguration = gtnhConfiguration;
-    private readonly IGithubApiService _githubApiService = githubApiService;
+    private readonly IGithubService _githubService = githubApiService;
 
     public async Task<DailyVersionDto> GetLatestDailyVersionAsync(bool? success = null, CancellationToken cancellationToken = default)
     {
@@ -21,10 +21,10 @@ public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfig
         }
         else
         {
-            filter = success.Value ? _githubApiService.SuccessFilter : _githubApiService.FailureFilter;
+            filter = success.Value ? _githubService.SuccessFilter : _githubService.FailureFilter;
         }
 
-        var latestRun = await _githubApiService.GetOneWorkflowRunAsync(
+        var latestRun = await _githubService.GetOneWorkflowRunAsync(
             _gtnhConfiguration.DailyBuildsRepoOwner,
             _gtnhConfiguration.DailyBuildsRepoName,
             _gtnhConfiguration.DailyBuildsWorkflowId,
@@ -41,7 +41,7 @@ public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfig
 
     public async Task<DailyVersionDto?> GetSpecificDailyVersionAsync(int dailyVersionNumber, CancellationToken cancellationToken = default)
     {
-        var workflowRun = await _githubApiService.GetOneWorkflowRunAsync(
+        var workflowRun = await _githubService.GetOneWorkflowRunAsync(
             _gtnhConfiguration.DailyBuildsRepoOwner,
             _gtnhConfiguration.DailyBuildsRepoName,
             _gtnhConfiguration.DailyBuildsWorkflowId,
@@ -92,7 +92,7 @@ public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfig
 
     private async Task<DownloadUrlsDto?> GetDownloadUrlsAsync(WorkflowRunDto workflowRun, CancellationToken cancellationToken = default)
     {
-        var workflowArtifacts = await _githubApiService.GetWorkflowArtifactsAsync(
+        var workflowArtifacts = await _githubService.GetWorkflowArtifactsAsync(
             _gtnhConfiguration.DailyBuildsRepoOwner,
             _gtnhConfiguration.DailyBuildsRepoName,
             workflowRun.Id,

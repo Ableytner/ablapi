@@ -1,18 +1,15 @@
 using AblApi.Api;
 using AblApi.Common.Extensions;
-using AblApi.Core.AppGithubApi;
-using AblApi.Core.AppGithubApi.Dtos;
+using AblApi.Core.AppGithub;
+using AblApi.Core.AppGithub.Dtos;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using System.Net;
-using System.Text;
-using System.Text.Json;
 
 namespace Integration.Api.Core;
 
-public class GithubApiServiceTests
+public class GithubServiceTests
 {
-    private readonly ILogger<GithubApiService> _logger;
+    private readonly ILogger<GithubService> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly HttpClient _httpClient;
 
@@ -21,21 +18,25 @@ public class GithubApiServiceTests
     private readonly string _workflowId = "daily-modpack-build.yml";
     private readonly long _runId = 30980037491L;
 
-    public GithubApiServiceTests()
+    public GithubServiceTests()
     {
         DotEnv.LoadEnvVariables();
 
-        _logger = Substitute.For<ILogger<GithubApiService>>();
-        _httpClient = new GithubHttpClient();
+        _logger = Substitute.For<ILogger<GithubService>>();
+
+        // TODO: Somehow get Github token from configuration
+        var githubAppSettings = Substitute.For<GithubAppSettings>();
+        _httpClient = new GithubHttpClient(Substitute.For<ILogger<GithubHttpClient>>(), githubAppSettings);
+
         _httpClientFactory = Substitute.For<IHttpClientFactory>();
-        _httpClientFactory.CreateClient("GithubApi").Returns(_httpClient);
+        _httpClientFactory.CreateClient("Github").Returns(_httpClient);
     }
 
     [Fact]
     public async Task GetOneWorkflowRunAsync_WithoutFilter_ReturnsFirstRun()
     {
         // Arrange
-        var service = new GithubApiService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetOneWorkflowRunAsync(_owner, _repo, _workflowId, TestContext.Current.CancellationToken);
@@ -49,7 +50,7 @@ public class GithubApiServiceTests
     public async Task GetOneWorkflowRunAsync_WithSuccessFilter_ReturnsFirstSuccessfulRun()
     {
         // Arrange
-        var service = new GithubApiService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetOneWorkflowRunAsync(_owner, _repo, _workflowId, service.SuccessFilter, TestContext.Current.CancellationToken);
@@ -63,7 +64,7 @@ public class GithubApiServiceTests
     public async Task GetOneWorkflowRunAsync_WithFailureFilter_ReturnsFirstFailedRun()
     {
         // Arrange
-        var service = new GithubApiService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetOneWorkflowRunAsync(_owner, _repo, _workflowId, service.FailureFilter, TestContext.Current.CancellationToken);
@@ -79,7 +80,7 @@ public class GithubApiServiceTests
         // Arrange
         var filter = new Func<WorkflowRunDto, bool>(run => run.RunNumber == 9999);
 
-        var service = new GithubApiService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetOneWorkflowRunAsync(_owner, _repo, _workflowId, filter, TestContext.Current.CancellationToken);
@@ -94,7 +95,7 @@ public class GithubApiServiceTests
         // Arrange
         var count = 3;
 
-        var service = new GithubApiService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetWorkflowRunsAsync(_owner, _repo, _workflowId, count, TestContext.Current.CancellationToken);
@@ -110,7 +111,7 @@ public class GithubApiServiceTests
         // Arrange
         var count = 113;
 
-        var service = new GithubApiService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetWorkflowRunsAsync(_owner, _repo, _workflowId, count, TestContext.Current.CancellationToken);
@@ -127,7 +128,7 @@ public class GithubApiServiceTests
         var count = 10;
         var filter = new Func<WorkflowRunDto, bool>(run => run.RunNumber == 111);
 
-        var service = new GithubApiService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetWorkflowRunsAsync(_owner, _repo, _workflowId, count, filter, TestContext.Current.CancellationToken);
@@ -143,7 +144,7 @@ public class GithubApiServiceTests
         // Arrange
         var count = 105;
 
-        var service = new GithubApiService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetWorkflowRunsAsync(_owner, _repo, _workflowId, count, service.SuccessFilter, TestContext.Current.CancellationToken);
@@ -158,7 +159,7 @@ public class GithubApiServiceTests
     public async Task GetAllWorkflowRunsAsync_ReturnsAllRuns()
     {
         // Arrange
-        var service = new GithubApiService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetAllWorkflowRunsAsync(_owner, _repo, _workflowId, TestContext.Current.CancellationToken);
@@ -172,7 +173,7 @@ public class GithubApiServiceTests
     public async Task GetWorkflowArtifactsAsync_ReturnsArtifacts()
     {
         // Arrange
-        var service = new GithubApiService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetWorkflowArtifactsAsync(_owner, _repo, _runId, TestContext.Current.CancellationToken);

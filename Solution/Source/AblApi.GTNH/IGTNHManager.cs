@@ -1,5 +1,4 @@
-﻿using AblApi.Core.AppGithubApi.Dtos;
-using AblApi.GTNH.Dtos;
+﻿using AblApi.GTNH.Dtos;
 
 namespace AblApi.GTNH;
 

@@ -10,10 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Elastic.Serilog.Sinks" Version="9.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\AblApi.DataAccess\AblApi.DataAccess.csproj" />
+    <ProjectReference Include="..\..\AblApi.Repositories\AblApi.Repositories.csproj" />
     <ProjectReference Include="..\AblApi.GTNH\AblApi.GTNH.csproj" />
     <ProjectReference Include="..\AblApi.Common\AblApi.Common.csproj" />
     <ProjectReference Include="..\AblApi.Core\AblApi.Core.csproj" />

@@ -28,11 +28,11 @@
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.3.1" />
     <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2" />
     <PackageReference Include="Respawn" Version="7.0.0" />
-    <PackageReference Include="NSubstitute" Version="5.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Source\AblApi.Api\AblApi.Api.csproj" />
+    <ProjectReference Include="..\..\Tests.Common\Tests.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

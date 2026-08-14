@@ -1,4 +1,4 @@
-﻿using AblApi.Core.AppGithubApi.Dtos;
+﻿using AblApi.Core.AppGithub.Dtos;
 
 namespace AblApi.GTNH.DailyVersionSchemas;
 

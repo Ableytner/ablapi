@@ -1,8 +1,6 @@
-
-using AblApi.Api;
 using AblApi.Api.Startup;
 
-namespace AblApi;
+namespace AblApi.Api;
 
 public class Program
 {
@@ -12,31 +10,45 @@ public class Program
 
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.ConfigureLogging();
+
         // Add services to the container.
         builder.Services.AddAppServices(builder.Configuration);
         builder.Services.AddEndpoints(builder.Configuration);
+        builder.Services.AddAuth(builder.Configuration);
 
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+        // TODO: configure OpenAPI (https://aka.ms/aspnet/openapi)
         // builder.Services.AddOpenApi();
 
-        builder.Services.AddControllers().AddJsonOptions(options =>
-        {
-            options.JsonSerializerOptions.PropertyNamingPolicy = null;
-            options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-        });
+        builder.Services.AddControllers()
+            .AddJsonOptions(options => {
+                options.JsonSerializerOptions.PropertyNamingPolicy = null;
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            });
 
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+            app.UseExceptionHandler("/error-development");
+        }
+        else
+        {
+            app.UseExceptionHandler("/error");
         }
 
+        // TODO: HTTPS communication with reverse proxy
         // app.UseHttpsRedirection();
 
-        // app.UseAuthorization();
-        // app.UseAuthentication();
+        app.UseCors(policy => policy.AllowAnyHeader()
+            .AllowAnyMethod()
+            .SetIsOriginAllowed(origin => true)
+            .AllowCredentials()
+            .WithExposedHeaders("Content-Disposition"));
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapControllers();
 
