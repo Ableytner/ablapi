@@ -2,16 +2,18 @@ using AblApi.Api;
 using AblApi.Common.Extensions;
 using AblApi.Core.AppGithub;
 using AblApi.Core.AppGithub.Dtos;
+using Integration.Api.Fixture;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Integration.Api.Core;
 
-public class GithubServiceTests
+public class GithubServiceTests : TestBase
 {
     private readonly ILogger<GithubService> _logger;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly HttpClient _httpClient;
+    private readonly IGithubHttpClient _realHttpClient;
+    private readonly IGithubHttpClient _mockHttpClient;
 
     private readonly string _owner = "GTNewHorizons";
     private readonly string _repo = "DreamAssemblerXXL";
@@ -24,19 +26,28 @@ public class GithubServiceTests
 
         _logger = Substitute.For<ILogger<GithubService>>();
 
-        // TODO: Somehow get Github token from configuration
-        var githubAppSettings = Substitute.For<GithubAppSettings>();
-        _httpClient = new GithubHttpClient(Substitute.For<ILogger<GithubHttpClient>>(), githubAppSettings);
+        _realHttpClient = TestHelpers.ApiFactory.Services.GetService<IGithubHttpClient>();
 
-        _httpClientFactory = Substitute.For<IHttpClientFactory>();
-        _httpClientFactory.CreateClient("Github").Returns(_httpClient);
+        _mockHttpClient = Substitute.For<IGithubHttpClient>();
+        _mockHttpClient.GetAsync(
+            $"repos/{_owner}/{_repo}/actions/workflows/{_workflowId}/runs?page=1&per_page=1",
+            Arg.Any<CancellationToken>()).Returns(Task.FromResult(GetWorkflowRuns_1())
+        );
+        _mockHttpClient.GetAsync(
+            $"repos/{_owner}/{_repo}/actions/workflows/{_workflowId}/runs?page=1&per_page=100",
+            Arg.Any<CancellationToken>()).Returns(Task.FromResult(GetWorkflowRuns_100_Page1())
+        );
+        _mockHttpClient.GetAsync(
+            $"repos/{_owner}/{_repo}/actions/workflows/{_workflowId}/runs?page=2&per_page=100",
+            Arg.Any<CancellationToken>()).Returns(Task.FromResult(GetWorkflowRuns_100_Page2())
+        );
     }
 
     [Fact]
     public async Task GetOneWorkflowRunAsync_WithoutFilter_ReturnsFirstRun()
     {
         // Arrange
-        var service = new GithubService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _mockHttpClient);
 
         // Act
         var result = await service.GetOneWorkflowRunAsync(_owner, _repo, _workflowId, TestContext.Current.CancellationToken);
@@ -50,7 +61,7 @@ public class GithubServiceTests
     public async Task GetOneWorkflowRunAsync_WithSuccessFilter_ReturnsFirstSuccessfulRun()
     {
         // Arrange
-        var service = new GithubService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _mockHttpClient);
 
         // Act
         var result = await service.GetOneWorkflowRunAsync(_owner, _repo, _workflowId, service.SuccessFilter, TestContext.Current.CancellationToken);
@@ -64,7 +75,7 @@ public class GithubServiceTests
     public async Task GetOneWorkflowRunAsync_WithFailureFilter_ReturnsFirstFailedRun()
     {
         // Arrange
-        var service = new GithubService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _mockHttpClient);
 
         // Act
         var result = await service.GetOneWorkflowRunAsync(_owner, _repo, _workflowId, service.FailureFilter, TestContext.Current.CancellationToken);
@@ -78,9 +89,8 @@ public class GithubServiceTests
     public async Task GetOneWorkflowRunAsync_NoMatchingRun_ReturnsNull()
     {
         // Arrange
+        var service = new GithubService(_logger, _mockHttpClient);
         var filter = new Func<WorkflowRunDto, bool>(run => run.RunNumber == 9999);
-
-        var service = new GithubService(_logger, _httpClientFactory);
 
         // Act
         var result = await service.GetOneWorkflowRunAsync(_owner, _repo, _workflowId, filter, TestContext.Current.CancellationToken);
@@ -95,7 +105,7 @@ public class GithubServiceTests
         // Arrange
         var count = 3;
 
-        var service = new GithubService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _mockHttpClient);
 
         // Act
         var result = await service.GetWorkflowRunsAsync(_owner, _repo, _workflowId, count, TestContext.Current.CancellationToken);
@@ -111,7 +121,7 @@ public class GithubServiceTests
         // Arrange
         var count = 113;
 
-        var service = new GithubService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _mockHttpClient);
 
         // Act
         var result = await service.GetWorkflowRunsAsync(_owner, _repo, _workflowId, count, TestContext.Current.CancellationToken);
@@ -126,9 +136,9 @@ public class GithubServiceTests
     {
         // Arrange
         var count = 10;
-        var filter = new Func<WorkflowRunDto, bool>(run => run.RunNumber == 111);
 
-        var service = new GithubService(_logger, _httpClientFactory);
+        var filter = new Func<WorkflowRunDto, bool>(run => run.RunNumber == 666);
+        var service = new GithubService(_logger, _mockHttpClient);
 
         // Act
         var result = await service.GetWorkflowRunsAsync(_owner, _repo, _workflowId, count, filter, TestContext.Current.CancellationToken);
@@ -144,7 +154,7 @@ public class GithubServiceTests
         // Arrange
         var count = 105;
 
-        var service = new GithubService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _mockHttpClient);
 
         // Act
         var result = await service.GetWorkflowRunsAsync(_owner, _repo, _workflowId, count, service.SuccessFilter, TestContext.Current.CancellationToken);
@@ -159,21 +169,21 @@ public class GithubServiceTests
     public async Task GetAllWorkflowRunsAsync_ReturnsAllRuns()
     {
         // Arrange
-        var service = new GithubService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _mockHttpClient);
 
         // Act
         var result = await service.GetAllWorkflowRunsAsync(_owner, _repo, _workflowId, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
-        Assert.True(result.Count > 100);
+        Assert.Equal(200, result.Count);
     }
 
     [Fact]
     public async Task GetWorkflowArtifactsAsync_ReturnsArtifacts()
     {
         // Arrange
-        var service = new GithubService(_logger, _httpClientFactory);
+        var service = new GithubService(_logger, _realHttpClient);
 
         // Act
         var result = await service.GetWorkflowArtifactsAsync(_owner, _repo, _runId, TestContext.Current.CancellationToken);
@@ -181,5 +191,29 @@ public class GithubServiceTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(7, result.TotalCount);
+    }
+
+    private HttpResponseMessage GetWorkflowRuns_1()
+    {
+        return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+        {
+            Content = new StringContent(File.ReadAllText("Data/workflowruns_1.json"))
+        };
+    }
+
+    private HttpResponseMessage GetWorkflowRuns_100_Page1()
+    {
+        return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+        {
+            Content = new StringContent(File.ReadAllText("Data/workflowruns_100_page1.json"))
+        };
+    }
+
+    private HttpResponseMessage GetWorkflowRuns_100_Page2()
+    {
+        return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+        {
+            Content = new StringContent(File.ReadAllText("Data/workflowruns_100_page2.json"))
+        };
     }
 }

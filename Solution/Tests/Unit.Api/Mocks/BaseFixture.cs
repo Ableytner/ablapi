@@ -13,15 +13,15 @@ namespace Tests.Unit.Api.Mocks;
 
 public abstract class BaseFixture
 {
-    protected readonly AblContext _ablContext;
-
     protected readonly IConfiguration Configuration;
+
+    public AblContext AblContext { get; }
 
     public ServiceProvider ServiceProvider { get; }
 
     protected BaseFixture(AblContext ablContext)
     {
-        _ablContext = ablContext;
+        AblContext = ablContext;
 
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
@@ -66,21 +66,15 @@ public abstract class BaseFixture
         services.AddSingleton(gtnhConfig);
 
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
+        services.AddSingleton<IGithubHttpClient, GithubHttpClient>();
         services.AddTransient<IGithubService, GithubService>();
         services.AddTransient<IGTNHManager, GTNHManager>();
-
-        services.AddHttpClient<GithubHttpClient>("Github");
     }
 
     private void ConfigureDatabase(IServiceCollection services)
     {
         services.AddScoped<IAblRepository, AblRepository>();
 
-        services.AddDbContext<AblContext>(_ => GetDbContext());
-    }
-
-    private AblContext GetDbContext()
-    {
-        return _ablContext;
+        services.AddSingleton(AblContext);
     }
 }

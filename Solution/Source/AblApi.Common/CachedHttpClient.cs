@@ -11,9 +11,9 @@ public class CachedHttpClient : HttpClient
             TimeSpan.FromSeconds(5),
             TimeSpan.FromSeconds(5)
         );
-    private static readonly InMemoryCacheHandler innerHandler = new InMemoryCacheHandler(cacheExpirationPerHttpResponseCode: cacheExpirationPerHttpResponseCode);
+    private static readonly InMemoryCacheHandler innerHandler = new(cacheExpirationPerHttpResponseCode: cacheExpirationPerHttpResponseCode);
 
-    public CachedHttpClient() : base(innerHandler)
+    public CachedHttpClient() : base(innerHandler, false)
     {
     }
 }

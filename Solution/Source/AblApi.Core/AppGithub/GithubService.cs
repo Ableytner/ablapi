@@ -4,22 +4,36 @@ using System.Text.Json;
 
 namespace AblApi.Core.AppGithub;
 
-public class GithubService(ILogger<GithubService> logger, IHttpClientFactory httpClientFactory) : IGithubService
+public class GithubService(ILogger<GithubService> logger, IGithubHttpClient httpClient) : IGithubService
 {
     private readonly int _workflowsPerPage = 100;
 
     private readonly ILogger<GithubService> _logger = logger;
-    private readonly HttpClient _httpClient = httpClientFactory.CreateClient("Github");
+    private readonly IGithubHttpClient _httpClient = httpClient;
 
     public bool SuccessFilter(WorkflowRunDto run) => run.Conclusion == "success";
 
     public bool FailureFilter(WorkflowRunDto run) => run.Conclusion == "failure";
 
+    public async Task<bool> TestTokenAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await _httpClient.TestToken();
+
+        if (!result)
+        {
+            _logger.LogError("Failed to connect to Github API. Please check your Github token and network connectivity.");
+        }
+
+        return result;
+    }
+
     public async Task<WorkflowRunDto?> GetOneWorkflowRunAsync(string owner, string repo, string workflowId, CancellationToken cancellationToken = default)
     {
-        return await GetOneWorkflowRunAsync(owner, repo, workflowId, null, cancellationToken);
+        var workflowRuns = await GetPagedWorkflowRunsAsync(owner, repo, workflowId, 1, 1, cancellationToken);
+
+        return workflowRuns.WorkflowRuns.First();
     }
-    public async Task<WorkflowRunDto?> GetOneWorkflowRunAsync(string owner, string repo, string workflowId, Func<WorkflowRunDto, bool>? filter = null, CancellationToken cancellationToken = default)
+    public async Task<WorkflowRunDto?> GetOneWorkflowRunAsync(string owner, string repo, string workflowId, Func<WorkflowRunDto, bool> filter, CancellationToken cancellationToken = default)
     {
         var workflowRuns = await GetPagedWorkflowRunsAsync(owner, repo, workflowId, 1, _workflowsPerPage, cancellationToken);
 

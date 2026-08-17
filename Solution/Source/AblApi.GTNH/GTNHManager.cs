@@ -2,15 +2,36 @@
 using AblApi.Core.AppGithub.Dtos;
 using AblApi.GTNH.DailyVersionSchemas;
 using AblApi.GTNH.Dtos;
+using AblApi.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AblApi.GTNH;
 
-public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfiguration, IGithubService githubApiService) : IGTNHManager
+public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfiguration, IGithubService githubApiService, IAblRepository ablRepository) : IGTNHManager
 {
     private readonly ILogger<GTNHManager> _logger = logger;
     private readonly GTNHAppSettings _gtnhConfiguration = gtnhConfiguration;
     private readonly IGithubService _githubService = githubApiService;
+    private readonly IAblRepository _ablRepository = ablRepository;
+
+    public async Task<bool> TestToken()
+    {
+        return await _githubService.TestTokenAsync();
+    }
+
+    public async Task<int> GetLatestDailyVersionRunNumberAsync(CancellationToken cancellationToken = default)
+    {
+        var latestRun = await _githubService.GetOneWorkflowRunAsync(
+            _gtnhConfiguration.DailyBuildsRepoOwner,
+            _gtnhConfiguration.DailyBuildsRepoName,
+            _gtnhConfiguration.DailyBuildsWorkflowId,
+            cancellationToken);
+        if (latestRun == null)
+        {
+            throw new InvalidOperationException("No workflow runs found for the daily builds workflow. Did the name change?");
+        }
+        return latestRun.RunNumber;
+    }
 
     public async Task<DailyVersionDto> GetLatestDailyVersionAsync(bool? success = null, CancellationToken cancellationToken = default)
     {
@@ -60,7 +81,7 @@ public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfig
     {
         return new DailyVersionDto
         {
-            Version = await GetStableVersionForDailyRun(workflowRun.RunNumber),
+            Version = await GetStableVersionForDailyRun(workflowRun),
             RunNumber = workflowRun.RunNumber,
             Success = workflowRun.Conclusion == "success",
             CreatedAt = workflowRun.CreatedAt,
@@ -68,6 +89,58 @@ public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfig
             RunUrl = workflowRun.Url,
             RunUrlHtml = workflowRun.HtmlUrl,
             DownloadUrls = await GetDownloadUrlsAsync(workflowRun)
+        };
+    }
+
+    private async Task<string> GetStableVersionForDailyRun(WorkflowRunDto run)
+    {
+        return "2.8.4";
+
+        var stableVersions = await _ablRepository.GTNHStableVersionRepository.GetAllAsListAsync();
+
+        stableVersions.Sort((a, b) => a.CreatedAt.CompareTo(b.CreatedAt));
+
+        if (run.CreatedAt > stableVersions[0].CreatedAt)
+        {
+            return stableVersions[0].Version;
+        }
+
+        foreach (var stableVersion in stableVersions)
+        {
+            if (run.CreatedAt <= stableVersion.CreatedAt)
+            {
+                return stableVersion.Version;
+            }
+        }
+
+        throw new Exception($"Daily run {run.RunNumber} is older than all stable versions, this should never happen!");
+    }
+
+    private async Task<DownloadUrlsDto?> GetDownloadUrlsAsync(WorkflowRunDto workflowRun, CancellationToken cancellationToken = default)
+    {
+        var workflowArtifacts = await _githubService.GetWorkflowArtifactsAsync(
+            _gtnhConfiguration.DailyBuildsRepoOwner,
+            _gtnhConfiguration.DailyBuildsRepoName,
+            workflowRun.Id,
+            cancellationToken
+        );
+
+        var versionSchema = GetDailyVersionSchema(workflowRun.RunNumber);
+
+        var clientUrl = versionSchema.GetClientDownloadUrl(workflowArtifacts);
+        var clientJava8Url = versionSchema.GetClientJava8DownloadUrl(workflowArtifacts);
+        var serverUrl = versionSchema.GetServerDownloadUrl(workflowArtifacts);
+        var serverJava8Url = versionSchema.GetServerJava8DownloadUrl(workflowArtifacts);
+
+        if (clientUrl is null || clientJava8Url is null || serverUrl is null || serverJava8Url is null)
+            return null;
+
+        return new DownloadUrlsDto
+        {
+            Client = clientUrl,
+            ClientJava8 = clientJava8Url,
+            Server = serverUrl,
+            ServerJava8 = serverJava8Url
         };
     }
 
@@ -88,37 +161,5 @@ public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfig
         }
 
         throw new InvalidOperationException($"No schema found for workflow run number {workflowRunNumber}, a new one needs to be added!");
-    }
-
-    private async Task<DownloadUrlsDto?> GetDownloadUrlsAsync(WorkflowRunDto workflowRun, CancellationToken cancellationToken = default)
-    {
-        var workflowArtifacts = await _githubService.GetWorkflowArtifactsAsync(
-            _gtnhConfiguration.DailyBuildsRepoOwner,
-            _gtnhConfiguration.DailyBuildsRepoName,
-            workflowRun.Id,
-            cancellationToken
-        );
-
-        var versionSchema = GetDailyVersionSchema(workflowRun.RunNumber);
-
-        var clientUrl = versionSchema.GetClientDownloadUrl(workflowArtifacts);
-        var serverUrl = versionSchema.GetServerDownloadUrl(workflowArtifacts);
-
-        if (clientUrl == null || serverUrl == null)
-        {
-            return null;
-        }
-
-        return new DownloadUrlsDto
-        {
-            Client = clientUrl,
-            Server = serverUrl
-        };
-    }
-
-    private async Task<string> GetStableVersionForDailyRun(int runNumber, CancellationToken cancellationToken = default)
-    {
-        // TODO: determine stable version based on daily run date
-        return "2.9.0";
     }
 }

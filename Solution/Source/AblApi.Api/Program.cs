@@ -31,11 +31,13 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
-            app.UseExceptionHandler("/error-development");
+            // TODO: log stack trace in development environment
+            // app.UseExceptionHandler("/error-development");
         }
         else
         {
-            app.UseExceptionHandler("/error");
+            // TODO: log error message only
+            // app.UseExceptionHandler("/error");
         }
 
         // TODO: HTTPS communication with reverse proxy

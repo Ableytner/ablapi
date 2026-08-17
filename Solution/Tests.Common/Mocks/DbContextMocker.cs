@@ -8,22 +8,28 @@ namespace Tests.Common.Mocks;
 
 public static class DbContextMocker
 {
+	private static readonly Lock _lock = new();
+
 	public static AblContext GetSqliteContextInMemory(string dbName)
 	{
-		ILogger<AblContext> logger = Substitute.For<ILogger<AblContext>>();
+        _lock.Enter();
 
-		var options = new DbContextOptionsBuilder<AblContext>()
-			.UseSqlite($"DataSource=Data/{dbName}.db;Mode=Memory;Cache=Shared")
-			.ConfigureWarnings(x => {
-				x.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.AmbientTransactionWarning);
+        ILogger<AblContext> logger = Substitute.For<ILogger<AblContext>>();
+
+        var options = new DbContextOptionsBuilder<AblContext>()
+            .UseSqlite($"DataSource=Data/{dbName}.db;Mode=Memory;Cache=Shared")
+            .ConfigureWarnings(x => {
+                x.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.AmbientTransactionWarning);
             })
-			.Options;
+            .Options;
 
-		var dbContext = new AblContext(options, logger);
-		dbContext.Database.OpenConnection();
-		dbContext.Database.EnsureCreated();
-		Task.Run(async () => await dbContext.SeedInMemory()).Wait();
+        var dbContext = new AblContext(options, logger);
+        dbContext.Database.OpenConnection();
+        dbContext.Database.EnsureCreated();
+        Task.Run(async () => await dbContext.SeedInMemory()).Wait();
 
-		return dbContext;
-	}
+        _lock.Exit();
+
+        return dbContext;
+    }
 }

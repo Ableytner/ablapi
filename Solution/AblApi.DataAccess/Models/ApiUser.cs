@@ -2,9 +2,9 @@
 
 public class ApiUser
 {
-    public required Guid Id { get; set; }
+    public Guid Id { get; set; }
 
-    public required string Name { get; set; }
+    public string Name { get; set; }
 
-    public required ICollection<ApiAccessRoleGrant> Roles { get; set; } = new List<ApiAccessRoleGrant>();
+    public virtual ICollection<ApiAccessRoleGrant> Roles { get; set; } = new List<ApiAccessRoleGrant>();
 }

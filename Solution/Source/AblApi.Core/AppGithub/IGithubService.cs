@@ -8,8 +8,10 @@ public interface IGithubService
 
     public bool FailureFilter(WorkflowRunDto run);
 
+    public Task<bool> TestTokenAsync(CancellationToken cancellationToken = default);
+
     public Task<WorkflowRunDto?> GetOneWorkflowRunAsync(string owner, string repo, string workflowId, CancellationToken cancellationToken = default);
-    public Task<WorkflowRunDto?> GetOneWorkflowRunAsync(string owner, string repo, string workflowId, Func<WorkflowRunDto, bool>? filter = null, CancellationToken cancellationToken = default);
+    public Task<WorkflowRunDto?> GetOneWorkflowRunAsync(string owner, string repo, string workflowId, Func<WorkflowRunDto, bool> filter, CancellationToken cancellationToken = default);
 
     public Task<List<WorkflowRunDto>> GetWorkflowRunsAsync(string owner, string repo, string workflowId, int count, CancellationToken cancellationToken = default);
     public Task<List<WorkflowRunDto>> GetWorkflowRunsAsync(string owner, string repo, string workflowId, int count, Func<WorkflowRunDto, bool>? filter = null, CancellationToken cancellationToken = default);

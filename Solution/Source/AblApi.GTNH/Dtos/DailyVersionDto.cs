@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using AblApi.DataAccess.Models.GTNH;
+using System.Text.Json.Serialization;
 
 namespace AblApi.GTNH.Dtos;
 
@@ -27,4 +28,22 @@ public class DailyVersionDto
 
     [JsonPropertyName("downloads")]
     public required DownloadUrlsDto? DownloadUrls { get; set; }
+
+    public DailyVersion Map()
+    {
+        return new DailyVersion
+        {
+            Version = this.Version,
+            RunNumber = this.RunNumber,
+            Success = this.Success,
+            CreatedAt = this.CreatedAt,
+            UpdatedAt = this.UpdatedAt,
+            RunUrl = this.RunUrl,
+            RunHtmlUrl = this.RunUrlHtml,
+            ClientDownloadUrl = this.DownloadUrls?.Client,
+            ClientDownloadUrlJava8 = this.DownloadUrls?.ClientJava8,
+            ServerDownloadUrl = this.DownloadUrls?.Server,
+            ServerDownloadUrlJava8 = this.DownloadUrls?.ServerJava8
+        };
+    }
 }

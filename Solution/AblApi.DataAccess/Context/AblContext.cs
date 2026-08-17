@@ -1,4 +1,5 @@
 ﻿using AblApi.DataAccess.Models;
+using AblApi.DataAccess.Models.GTNH;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,10 @@ public class AblContext(DbContextOptions<AblContext> options, ILogger<AblContext
     public virtual DbSet<ApiUser> ApiUsers { get; set; }
 
     public virtual DbSet<ApiAccessRoleGrant> ApiAccessRoleGrants { get; set; }
+
+    public virtual DbSet<StableVersion> GTNHStableVersions { get; set; }
+
+    public virtual DbSet<DailyVersion> GTNHDailyVersions { get; set; }
 
     public virtual DbSet<SchemaVersion> SchemaVersions { get; set; }
 
@@ -32,8 +37,30 @@ public class AblContext(DbContextOptions<AblContext> options, ILogger<AblContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Roles)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.ClientCascade)
                 .HasConstraintName("FK_ApiAccessRoleGrants_ApiUsers");
+        });
+
+        modelBuilder.Entity<StableVersion>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Version).HasMaxLength(32);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<DailyVersion>(entity =>
+        {
+            entity.HasKey(e => e.RunNumber);
+
+            entity.Property(e => e.Version).HasMaxLength(32);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.RunUrl).HasMaxLength(255);
+            entity.Property(e => e.RunHtmlUrl).HasMaxLength(255);
+            entity.Property(e => e.ClientDownloadUrl).HasMaxLength(255);
+            entity.Property(e => e.ClientDownloadUrlJava8).HasMaxLength(255);
+            entity.Property(e => e.ServerDownloadUrl).HasMaxLength(255);
+            entity.Property(e => e.ServerDownloadUrlJava8).HasMaxLength(255);
         });
 
         modelBuilder.Entity<SchemaVersion>(entity =>

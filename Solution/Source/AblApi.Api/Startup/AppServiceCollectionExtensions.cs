@@ -19,10 +19,9 @@ internal static class AppServiceCollectionExtensions
         config.GetSection(GTNHAppSettings.SectionName).Bind(gtnhConfig);
         services.AddSingleton(gtnhConfig);
 
+        services.AddSingleton<IGithubHttpClient, GithubHttpClient>();
         services.AddTransient<IGithubService, GithubService>();
         services.AddTransient<IGTNHManager, GTNHManager>();
-
-        services.AddHttpClient<GithubHttpClient>("Github");
 
         services.AddLocalization();
 

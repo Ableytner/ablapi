@@ -18,6 +18,7 @@ public abstract class CyclicBackgroundService(ILogger logger) : BackgroundServic
 		catch (Exception ex)
 		{
 			Logger.LogError("{Name}.{Function} - Init: Caught Exception {ExceptionMessage}, {Exception}", Name, nameof(ExecuteAsync), ex.Message, ex);
+			throw;
 		}
 
 		while (!stoppingToken.IsCancellationRequested)

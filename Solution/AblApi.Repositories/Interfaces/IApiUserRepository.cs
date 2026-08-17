@@ -1,6 +1,8 @@
-﻿namespace AblApi.Repositories.Interfaces;
+﻿using AblApi.DataAccess.Models;
 
-public interface IApiUserRepository
+namespace AblApi.Repositories.Interfaces;
+
+public interface IApiUserRepository : IGenericRepository<ApiUser>
 {
-
+    public Task UpsertAsync(ApiUser entity);
 }

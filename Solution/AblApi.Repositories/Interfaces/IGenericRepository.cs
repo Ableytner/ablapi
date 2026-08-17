@@ -4,31 +4,28 @@ namespace AblApi.Repositories.Interfaces;
 
 public interface IGenericRepository<T> where T : class
 {
-    Task<T?> GetByIdAsync(Guid id);
-
     // ------------------------------------------------------------
     // Section Getters
-    T GetById(Guid id);
+    public Task<T?> GetByIdAsync(Guid id);
+    public Task<T?> GetByIdAsync(Expression<Func<T, bool>> expression);
 
-    T GetById(Expression<Func<T, bool>> expression);
+    public IQueryable<T> GetAll();
 
-    IQueryable<T> GetAll();
-
-    public IEnumerable<T> GetAllAsList();
+    public Task<List<T>> GetAllAsListAsync();
     
-    IEnumerable<T> Find(Expression<Func<T, bool>> expression);
+    public IQueryable<T> Find(Expression<Func<T, bool>> expression);
 
     // ------------------------------------------------------------
     // Section Adders
-    void Add(T entity);
+    public void Add(T entity);
 
-    void AddRange(IEnumerable<T> entities);
+    public void AddRange(IEnumerable<T> entities);
 
-    Task AddRangeAsync(IEnumerable<T> entities);
+    public Task AddRangeAsync(IEnumerable<T> entities);
 
     // ------------------------------------------------------------
     // Section Removers
-    void Remove(T entity);
+    public void Remove(T entity);
 
-    void RemoveRange(IEnumerable<T> entities);
+    public void RemoveRange(IEnumerable<T> entities);
 }
