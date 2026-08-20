@@ -1,59 +1,77 @@
 ﻿using AblApi.Api;
 using AblApi.DataAccess.Context;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using NSubstitute;
+using Tests.Common.Mocks;
 
 namespace Integration.Api.Fixture;
 
-/// <summary>
-/// A factory which creates the test API for integration tests.
-/// The given ablContext is used as the database
-/// </summary>
-public class TestApiFactory(AblContext ablContext) : WebApplicationFactory<Program>
+public class TestApiFactory(string databaseName, bool useRealAuth = false) : WebApplicationFactory<Program>
 {
 	private const string HostUrl = "https://localhost:5813";
-    private readonly AblContext _ablContext = ablContext;
+	private readonly string _databaseName = databaseName;
+	private readonly bool _useRealAuth = useRealAuth;
 
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+	protected override void ConfigureWebHost(IWebHostBuilder builder)
 	{
 		builder.ConfigureServices((context, services) =>
 		{
-			SetupAuth(services);
-            SetupDb(services);
+			if (!_useRealAuth)
+			{
+				SetupAuth(services);
+			}
+
+			SetupDb(services);
 		});
 
-        builder.UseUrls(HostUrl);
+		builder.UseUrls(HostUrl);
 	}
 
-    private static void SetupAuth(IServiceCollection services)
-    {
-        services.Configure<AuthenticationOptions>(o =>
-        {
-            o.DefaultScheme = TestAuthHandler.SchemeName;
-            o.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
-            o.DefaultChallengeScheme = TestAuthHandler.SchemeName;
-            o.DefaultForbidScheme = TestAuthHandler.SchemeName;
-            o.DefaultSignInScheme = TestAuthHandler.SchemeName;
-            o.DefaultSignOutScheme = TestAuthHandler.SchemeName;
-        });
+	private static void SetupAuth(IServiceCollection services)
+	{
+		// Remove the JWT Bearer authentication that was added by AddAuth
+		var jwtBearerDescriptor = services.FirstOrDefault(d => 
+			d.ServiceType == typeof(IConfigureOptions<JwtBearerOptions>));
+		if (jwtBearerDescriptor != null)
+		{
+			services.Remove(jwtBearerDescriptor);
+		}
 
-        services.AddAuthentication()
-            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-                TestAuthHandler.SchemeName, _ => { });
-    }
+		services.Configure<AuthenticationOptions>(o =>
+		{
+			o.DefaultScheme = TestAuthHandler.SchemeName;
+			o.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+			o.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+			o.DefaultForbidScheme = TestAuthHandler.SchemeName;
+			o.DefaultSignInScheme = TestAuthHandler.SchemeName;
+			o.DefaultSignOutScheme = TestAuthHandler.SchemeName;
+		});
 
-    private void SetupDb(IServiceCollection services)
+		services.AddAuthentication()
+			.AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+				TestAuthHandler.SchemeName, _ => { });
+	}
+
+	private void SetupDb(IServiceCollection services)
 	{
 		services.RemoveAll<DbContextOptions<AblContext>>();
-		services.AddDbContext<AblContext>(_ => GetDbContext());
-	}
+		services.RemoveAll<AblContext>();
 
-    private AblContext GetDbContext()
-    {
-        return _ablContext;
-    }
+		// Register DbContext options that will create separate instances sharing the same in-memory database
+		var options = DbContextMocker.GetSqliteOptionsInMemory(_databaseName);
+
+		services.AddScoped<AblContext>(sp =>
+		{
+			var logger = sp.GetService<ILogger<AblContext>>() ?? Substitute.For<ILogger<AblContext>>();
+			return new AblContext(options, logger);
+		});
+	}
 }

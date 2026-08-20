@@ -4,13 +4,13 @@ using Microsoft.Extensions.Logging;
 
 namespace AblApi.GTNH;
 
-internal class GTNHBackgroundService(ILogger<GTNHBackgroundService> logger, IGTNHManager gtnhManager, IAblRepository ablRepository, GTNHAppSettings gtnhConfiguration) : CyclicBackgroundService(logger)
+internal class GTNHBackgroundService(ILogger<GTNHBackgroundService> logger, IGTNHService gtnhManager, IAblRepository ablRepository, GTNHAppSettings gtnhConfiguration) : CyclicBackgroundService(logger)
 {
     protected override string Name => nameof(GTNHBackgroundService);
     protected override TimeSpan CycleTime => _fetchCycle;
 
     private readonly ILogger<GTNHBackgroundService> _logger = logger;
-    private readonly IGTNHManager _gtnhManager = gtnhManager;
+    private readonly IGTNHService _gtnhManager = gtnhManager;
     private readonly IAblRepository _ablRepository = ablRepository;
     private readonly TimeSpan _fetchCycle = TimeSpan.FromSeconds(gtnhConfiguration.FetchCycleInSeconds);
 
@@ -27,7 +27,7 @@ internal class GTNHBackgroundService(ILogger<GTNHBackgroundService> logger, IGTN
     protected override async Task Cyclic()
     {
         var latestDailyVersion = await _gtnhManager.GetLatestDailyVersionRunNumberAsync();
-        var latestStoredDailyVersion = await _ablRepository.GTNHDailyVersionRepository.GetLatestDailyVersionAsync();
+        var latestStoredDailyVersion = await _ablRepository.GTNHDailyVersionRepository.GetLatestAsync();
 
         if (latestDailyVersion > latestStoredDailyVersion.RunNumber)
         {

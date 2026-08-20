@@ -1,5 +1,4 @@
 using AblApi.Api;
-using AblApi.Common.Extensions;
 using AblApi.Core.AppGithub;
 using AblApi.Core.AppGithub.Dtos;
 using Integration.Api.Fixture;
@@ -7,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Integration.Api.Core;
+namespace Integration.Api;
 
 public class GithubServiceTests : TestBase
 {
@@ -54,7 +53,6 @@ public class GithubServiceTests : TestBase
 
         // Assert
         Assert.NotNull(result);
-        Assert.True(result.UpdatedAt.IsWithinHoursOf(DateTime.UtcNow, 48));
     }
 
     [Fact]

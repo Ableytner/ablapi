@@ -31,8 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AblApi.Repositories\AblApi.Repositories.csproj" />
+    <ProjectReference Include="..\..\Source\AblApi.Repositories\AblApi.Repositories.csproj" />
     <ProjectReference Include="..\..\Source\AblApi.Api\AblApi.Api.csproj" />
-    <ProjectReference Include="..\..\Tests.Common\Tests.Common.csproj" />
+    <ProjectReference Include="..\Tests.Common\Tests.Common.csproj" />
   </ItemGroup>
 </Project>

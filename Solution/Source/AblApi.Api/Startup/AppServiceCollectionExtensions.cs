@@ -1,9 +1,5 @@
 using AblApi.Core.AppGithub;
-using AblApi.DataAccess.Context;
 using AblApi.GTNH;
-using AblApi.Repositories;
-using AblApi.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace AblApi.Api.Startup;
 
@@ -21,16 +17,9 @@ internal static class AppServiceCollectionExtensions
 
         services.AddSingleton<IGithubHttpClient, GithubHttpClient>();
         services.AddTransient<IGithubService, GithubService>();
-        services.AddTransient<IGTNHManager, GTNHManager>();
+        services.AddTransient<IGTNHService, GTNHService>();
 
         services.AddLocalization();
-
-        services.AddScoped<IAblRepository, AblRepository>();
-        services.AddDbContext<AblContext>(options =>
-            options.UseSqlite(
-                config.GetConnectionString("AblContext"),
-                sqlite => sqlite.CommandTimeout(120))
-        );
 
         return services;
     }

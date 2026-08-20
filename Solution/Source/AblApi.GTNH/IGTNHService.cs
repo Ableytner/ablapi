@@ -2,7 +2,7 @@
 
 namespace AblApi.GTNH;
 
-public interface IGTNHManager
+public interface IGTNHService
 {
     public Task<bool> TestToken();
 

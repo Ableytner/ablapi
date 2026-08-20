@@ -7,9 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace AblApi.GTNH;
 
-public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfiguration, IGithubService githubApiService, IAblRepository ablRepository) : IGTNHManager
+public class GTNHService(ILogger<GTNHService> logger, GTNHAppSettings gtnhConfiguration, IGithubService githubApiService, IAblRepository ablRepository) : IGTNHService
 {
-    private readonly ILogger<GTNHManager> _logger = logger;
+    private readonly ILogger<GTNHService> _logger = logger;
     private readonly GTNHAppSettings _gtnhConfiguration = gtnhConfiguration;
     private readonly IGithubService _githubService = githubApiService;
     private readonly IAblRepository _ablRepository = ablRepository;
@@ -35,22 +35,25 @@ public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfig
 
     public async Task<DailyVersionDto> GetLatestDailyVersionAsync(bool? success = null, CancellationToken cancellationToken = default)
     {
+        WorkflowRunDto? latestRun;
         Func<WorkflowRunDto, bool>? filter;
         if (success == null)
         {
-            filter = null;
+            latestRun = await _githubService.GetOneWorkflowRunAsync(
+                _gtnhConfiguration.DailyBuildsRepoOwner,
+                _gtnhConfiguration.DailyBuildsRepoName,
+                _gtnhConfiguration.DailyBuildsWorkflowId,
+                cancellationToken);
         }
         else
         {
-            filter = success.Value ? _githubService.SuccessFilter : _githubService.FailureFilter;
+            latestRun = await _githubService.GetOneWorkflowRunAsync(
+                _gtnhConfiguration.DailyBuildsRepoOwner,
+                _gtnhConfiguration.DailyBuildsRepoName,
+                _gtnhConfiguration.DailyBuildsWorkflowId,
+                success.Value ? _githubService.SuccessFilter : _githubService.FailureFilter,
+                cancellationToken);
         }
-
-        var latestRun = await _githubService.GetOneWorkflowRunAsync(
-            _gtnhConfiguration.DailyBuildsRepoOwner,
-            _gtnhConfiguration.DailyBuildsRepoName,
-            _gtnhConfiguration.DailyBuildsWorkflowId,
-            filter,
-            cancellationToken);
 
         if (latestRun == null)
         {
@@ -62,6 +65,12 @@ public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfig
 
     public async Task<DailyVersionDto?> GetSpecificDailyVersionAsync(int dailyVersionNumber, CancellationToken cancellationToken = default)
     {
+        var dbRun = await _ablRepository.GTNHDailyVersionRepository.GetByRunNumberAsync(dailyVersionNumber);
+        if (dbRun != null)
+        {
+            return DailyVersionDto.Map(dbRun);
+        }
+
         var workflowRun = await _githubService.GetOneWorkflowRunAsync(
             _gtnhConfiguration.DailyBuildsRepoOwner,
             _gtnhConfiguration.DailyBuildsRepoName,
@@ -74,7 +83,12 @@ public class GTNHManager(ILogger<GTNHManager> logger, GTNHAppSettings gtnhConfig
             return null;
         }
 
-        return await MapWorkflowRunToDailyVersionDto(workflowRun);
+        var dto = await MapWorkflowRunToDailyVersionDto(workflowRun);
+
+        _ablRepository.GTNHDailyVersionRepository.Add(dto.Map());
+        await _ablRepository.SaveChangesAsync();
+
+        return dto;
     }
 
     private async Task<DailyVersionDto> MapWorkflowRunToDailyVersionDto(WorkflowRunDto workflowRun)

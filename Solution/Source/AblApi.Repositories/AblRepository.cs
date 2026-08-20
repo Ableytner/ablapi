@@ -1,4 +1,5 @@
 ﻿using AblApi.DataAccess.Context;
+using AblApi.Repositories.GTNH;
 using AblApi.Repositories.Interfaces;
 using AblApi.Repositories.Interfaces.GTNH;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -13,6 +14,8 @@ public class AblRepository : IAblRepository
 
         ApiUserRepository = new ApiUserRepository(Context);
         ApiAccessRoleGrantRepository = new ApiAccessRoleGrantRepository(Context);
+        GTNHStableVersionRepository = new StableVersionRepository(Context);
+        GTNHDailyVersionRepository = new DailyVersionRepository(Context);
     }
 
     public readonly AblContext Context;

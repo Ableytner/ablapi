@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AblApi.DataAccess\AblApi.DataAccess.csproj" />
-    <ProjectReference Include="..\..\AblApi.Repositories\AblApi.Repositories.csproj" />
+    <ProjectReference Include="..\AblApi.DataAccess\AblApi.DataAccess.csproj" />
+    <ProjectReference Include="..\AblApi.Repositories\AblApi.Repositories.csproj" />
     <ProjectReference Include="..\AblApi.Common\AblApi.Common.csproj" />
     <ProjectReference Include="..\AblApi.Core\AblApi.Core.csproj" />
   </ItemGroup>

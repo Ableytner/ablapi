@@ -12,14 +12,16 @@ public abstract class TestBase : IAsyncLifetime
 
     protected TestHelpers TestHelpers { get; init; }
 
-    protected TestBase()
+    protected TestBase(bool useRealAuth = false)
     {
         // in-memory Sqlite database shared between test API and test code
-        var testDbContext = DbContextMocker.GetSqliteContextInMemory("TestBaseDb");
+        // uses a unique database name per test instance to ensure isolation
+        var uniqueDbName = $"TestBaseDb_{Guid.NewGuid():N}";
+        var testDbContext = DbContextMocker.GetSqliteContextInMemory(uniqueDbName);
 
         lock (_hostLock)
         {
-            _sharedFactory = new(testDbContext);
+            _sharedFactory = new(uniqueDbName, useRealAuth);
             _sharedClient = _sharedFactory.CreateClient();
         }
 

@@ -13,9 +13,10 @@ public class Program
         builder.ConfigureLogging();
 
         // Add services to the container.
-        builder.Services.AddAppServices(builder.Configuration);
-        builder.Services.AddEndpoints(builder.Configuration);
-        builder.Services.AddAuth(builder.Configuration);
+        builder.Services.AddAppServices(builder.Configuration)
+                        .AddEndpoints(builder.Configuration)
+                        .AddDatabaseServices(builder.Configuration)
+                        .AddAuth(builder.Configuration);
 
         // TODO: configure OpenAPI (https://aka.ms/aspnet/openapi)
         // builder.Services.AddOpenApi();

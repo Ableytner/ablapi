@@ -7,13 +7,18 @@ namespace AblApi.Repositories.GTNH;
 
 public class DailyVersionRepository(AblContext context) : GenericRepository<DailyVersion>(context), IDailyVersionRepository
 {
+    public async Task<DailyVersion?> GetByRunNumberAsync(int runNumber)
+    {
+        return await Context.GTNHDailyVersions.FirstOrDefaultAsync(x => x.RunNumber == runNumber);
+    }
+
+    public async Task<DailyVersion> GetLatestAsync()
+    {
+        return await Context.GTNHDailyVersions.OrderByDescending(x => x.RunNumber).FirstAsync();
+    }
+
     public async new Task<List<DailyVersion>> GetAllAsListAsync()
     {
         return await Context.GTNHDailyVersions.OrderByDescending(x => x.RunNumber).ToListAsync();
-    }
-
-    public async Task<DailyVersion> GetLatestDailyVersionAsync()
-    {
-        return await Context.GTNHDailyVersions.OrderByDescending(x => x.RunNumber).FirstAsync();
     }
 }

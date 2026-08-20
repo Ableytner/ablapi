@@ -9,8 +9,8 @@ namespace AblApi.Api.Controllers;
 [ApiController]
 public class HelloWorldController : ControllerBase
 {
-    [AccessLevel(AccessLevelType.PublicInternetAccess)]
     [HttpGet]
+    [AccessLevel(AccessLevelType.PublicInternetAccess)]
     public async Task<string> HelloWorld()
     {
         return "Hello, World!";
@@ -25,10 +25,26 @@ public class HelloWorldController : ControllerBase
     }
 
     [HttpGet]
-    [Route("private/")]
+    [Route("admin/")]
     [AuthorizeAdmin]
     public async Task<string> HelloWorldForAdmins()
     {
         return $"Hello, Admin!";
+    }
+
+    [HttpGet]
+    [Route("log/")]
+    [AuthorizeLog]
+    public async Task<string> HelloWorldForLogClients()
+    {
+        return $"Hello, Log client!";
+    }
+
+    [HttpGet]
+    [Route("discord/")]
+    [AuthorizeDiscordSendToAll]
+    public async Task<string> HelloWorldForDiscordMessageSenders()
+    {
+        return $"Hello, Discord message sender!";
     }
 }

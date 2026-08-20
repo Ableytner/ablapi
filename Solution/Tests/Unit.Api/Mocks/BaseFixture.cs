@@ -46,7 +46,7 @@ public abstract class BaseFixture
     private void ConfigureApps(IServiceCollection services)
     {
         var fileLogger = new LoggerConfiguration()
-            .WriteTo.File("/var/log/EMSBackend/logs-ablcontext-{Date}.txt", rollingInterval: RollingInterval.Day)
+            .WriteTo.File("/var/log/AblApi/logs-ablcontext-{Date}.txt", rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
         services.AddLogging(builder =>
@@ -68,7 +68,7 @@ public abstract class BaseFixture
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<IGithubHttpClient, GithubHttpClient>();
         services.AddTransient<IGithubService, GithubService>();
-        services.AddTransient<IGTNHManager, GTNHManager>();
+        services.AddTransient<IGTNHService, GTNHService>();
     }
 
     private void ConfigureDatabase(IServiceCollection services)

@@ -14,17 +14,20 @@
     <Project Path="Source/AblApi.Api/AblApi.Api.csproj" />
     <Project Path="Source/AblApi.Common/AblApi.Common.csproj" Id="a3b95698-984f-4361-823d-3d8a5d0bd9d0" />
     <Project Path="Source/AblApi.Core/AblApi.Core.csproj" Id="88c6e78c-aa17-4e6d-a72c-688a5bdc7663">
-      <BuildDependency Project="AblApi.DataAccess/AblApi.DataAccess.csproj" />
+      <BuildDependency Project="Source/AblApi.DataAccess/AblApi.DataAccess.csproj" />
     </Project>
     <Project Path="Source/AblApi.GTNH/AblApi.GTNH.csproj" Id="1e10d3a8-879d-4c5f-b505-35750adafa4b" />
   </Folder>
   <Folder Name="/Source/Infrastructure/">
-    <Project Path="AblApi.DataAccess/AblApi.DataAccess.csproj" Id="1c043364-5bb8-4679-90e5-cb5705ecfd7a" />
-    <Project Path="AblApi.Repositories/AblApi.Repositories.csproj" Id="cad5ddcd-6cd0-49b4-915c-8d2f5a1a3c03" />
+    <Project Path="Source/AblApi.DataAccess/AblApi.DataAccess.csproj" Id="1c043364-5bb8-4679-90e5-cb5705ecfd7a" />
+    <Project Path="Source/AblApi.Repositories/AblApi.Repositories.csproj" Id="cad5ddcd-6cd0-49b4-915c-8d2f5a1a3c03" />
   </Folder>
   <Folder Name="/Tests/">
-    <Project Path="Tests.Common/Tests.Common.csproj" Id="0086340f-594b-42ad-8a98-29dc0f28d21a" />
+    <Project Path="Tests/Tests.Common/Tests.Common.csproj" Id="0086340f-594b-42ad-8a98-29dc0f28d21a" />
     <Project Path="Tests/Integration.Api/Tests.Integration.Api.csproj" />
     <Project Path="Tests/Unit.Api/Tests.Unit.Api.csproj" />
+  </Folder>
+  <Folder Name="/Tools/">
+    <Project Path="Tools/AblApi.SqlTool/AblApi.SqlTool.csproj" Id="4af4fefe-c619-4dcb-9a29-9e719f549f49" />
   </Folder>
 </Solution>

@@ -13,16 +13,20 @@ public class JwtTokenService(JwtAppSettings jwtSettings) : IJwtTokenService
 
     public JwtToken CreateToken(Guid userId, IEnumerable<ApiAccessRole> roles)
     {
-        var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
+        var now = DateTime.UtcNow;
+        var expiresAt = now.AddMinutes(_jwtSettings.ExpiryMinutes);
 
-        // Claims are the pieces of information we store inside the token.
         var claims = new List<Claim>
         {
+            // which user the token is for
             new(JwtRegisteredClaimNames.Sub, userId.ToString()),
+            // when the token was issued
+            new(JwtRegisteredClaimNames.Iat, ((DateTimeOffset)now).ToUnixTimeSeconds().ToString()),
+            // unique token identifier
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        // One "role" claim per role the user has.
+        // one claim per role
         claims.AddRange(roles.Select(role => new Claim("role", role.ToString())));
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
@@ -31,6 +35,7 @@ public class JwtTokenService(JwtAppSettings jwtSettings) : IJwtTokenService
         var descriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
+            NotBefore = now,
             Expires = expiresAt,
             Issuer = _jwtSettings.Issuer,
             Audience = _jwtSettings.Audience,

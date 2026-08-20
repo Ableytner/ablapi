@@ -32,7 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Source\AblApi.Api\AblApi.Api.csproj" />
-    <ProjectReference Include="..\..\Tests.Common\Tests.Common.csproj" />
+    <ProjectReference Include="..\Tests.Common\Tests.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

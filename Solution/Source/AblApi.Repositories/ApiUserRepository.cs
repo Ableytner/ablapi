@@ -7,6 +7,13 @@ namespace AblApi.Repositories;
 
 public class ApiUserRepository(AblContext context) : GenericRepository<ApiUser>(context), IApiUserRepository
 {
+    public new async Task<ApiUser?> GetByIdAsync(Guid id)
+    {
+        return await Context.ApiUsers
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Id == id);
+    }
+
     public async Task UpsertAsync(ApiUser entity)
     {
         var record = await Context.ApiUsers.Where(x => x.Id == entity.Id).FirstOrDefaultAsync();

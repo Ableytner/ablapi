@@ -2,7 +2,7 @@
 using Integration.Api.Fixture;
 using System.Net.Http.Json;
 
-namespace Integration.Api.Core;
+namespace Integration.Api;
 
 public class GTNHControllerTests : TestBase
 {

@@ -46,4 +46,31 @@ public class DailyVersionDto
             ServerDownloadUrlJava8 = this.DownloadUrls?.ServerJava8
         };
     }
+
+    public static DailyVersionDto Map(DailyVersion version)
+    {
+        DownloadUrlsDto? downloadUrls = null;
+        if (version.ClientDownloadUrl != null && version.ClientDownloadUrlJava8 != null && version.ServerDownloadUrl != null && version.ServerDownloadUrlJava8 != null)
+        {
+            downloadUrls = new DownloadUrlsDto
+            {
+                Client = version.ClientDownloadUrl,
+                ClientJava8 = version.ClientDownloadUrlJava8,
+                Server = version.ServerDownloadUrl,
+                ServerJava8 = version.ServerDownloadUrlJava8
+            };
+        }
+
+        return new DailyVersionDto
+        {
+            Version = version.Version,
+            RunNumber = (int)version.RunNumber,
+            Success = version.Success,
+            CreatedAt = version.CreatedAt,
+            UpdatedAt = version.UpdatedAt,
+            RunUrl = version.RunUrl,
+            RunUrlHtml = version.RunHtmlUrl,
+            DownloadUrls = downloadUrls
+        };
+    }
 }
