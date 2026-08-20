@@ -13,6 +13,10 @@ internal static class AuthenticationServiceCollectionExtensions
     {
         var jwtConfig = new JwtAppSettings();
         config.GetSection(JwtAppSettings.SectionName).Bind(jwtConfig);
+        if (string.IsNullOrEmpty(jwtConfig.Key) || jwtConfig.Key == "JWTKEY")
+        {
+            throw new InvalidOperationException("JWT key is not configured.");
+        }
         services.AddSingleton(jwtConfig);
 
         services.AddTransient<IJwtTokenService, JwtTokenService>();

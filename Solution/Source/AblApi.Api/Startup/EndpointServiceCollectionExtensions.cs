@@ -1,7 +1,4 @@
-﻿using Asp.Versioning;
-using Asp.Versioning.Routing;
-
-namespace AblApi.Api.Startup;
+﻿namespace AblApi.Api.Startup;
 
 internal static class EndpointServiceCollectionExtensions
 {
@@ -9,19 +6,6 @@ internal static class EndpointServiceCollectionExtensions
 	{
 		// Routing
 		services.AddControllers();
-
-		services.AddApiVersioning(options =>
-		{
-			options.AssumeDefaultVersionWhenUnspecified = true;
-			options.DefaultApiVersion = new ApiVersion(1, 0);
-			options.ReportApiVersions = true;
-		});
-
-		// Register the 'apiVersion' route constraint  
-		services.Configure<RouteOptions>(options =>
-		{
-			options.ConstraintMap["apiVersion"] = typeof(ApiVersionRouteConstraint);
-		});
 
 		services.AddCors(opt =>
 		{

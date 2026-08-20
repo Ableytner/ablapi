@@ -1,4 +1,3 @@
-using AblApi.Api;
 using AblApi.Core.AppGithub;
 using AblApi.Core.AppGithub.Dtos;
 using Integration.Api.Fixture;
@@ -21,11 +20,7 @@ public class GithubServiceTests : TestBase
 
     public GithubServiceTests()
     {
-        DotEnv.LoadEnvVariables();
-
         _logger = Substitute.For<ILogger<GithubService>>();
-
-        _realHttpClient = TestHelpers.ApiFactory.Services.GetService<IGithubHttpClient>();
 
         _mockHttpClient = Substitute.For<IGithubHttpClient>();
         _mockHttpClient.GetAsync(
@@ -40,6 +35,8 @@ public class GithubServiceTests : TestBase
             $"repos/{_owner}/{_repo}/actions/workflows/{_workflowId}/runs?page=2&per_page=100",
             Arg.Any<CancellationToken>()).Returns(Task.FromResult(GetWorkflowRuns_100_Page2())
         );
+
+        _realHttpClient = TestHelpers.ApiFactory.Services.GetRequiredService<IGithubHttpClient>();
     }
 
     [Fact]

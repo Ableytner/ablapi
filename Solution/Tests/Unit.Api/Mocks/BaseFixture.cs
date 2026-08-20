@@ -1,3 +1,4 @@
+using AblApi.Api.Startup;
 using AblApi.Core.AppGithub;
 using AblApi.Core.AppJwtToken;
 using AblApi.DataAccess.Context;
@@ -28,15 +29,9 @@ public abstract class BaseFixture
             .WriteTo.Console()
             .CreateLogger();
 
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables();
-
-        Configuration = builder.Build();
+        Configuration = new ConfigurationBuilder().AddConfigProviders().Build();
 
         var services = new ServiceCollection();
-
         ConfigureApps(services);
         ConfigureDatabase(services);
 

@@ -9,6 +9,10 @@ internal static class AppServiceCollectionExtensions
     {
         var githubConfig = new GithubAppSettings();
         config.GetSection(GithubAppSettings.SectionName).Bind(githubConfig);
+        if (string.IsNullOrEmpty(githubConfig.Token) || githubConfig.Token == "GITHUBTOKEN")
+        {
+            throw new InvalidOperationException("Github token is not configured.");
+        }
         services.AddSingleton(githubConfig);
 
         var gtnhConfig = new GTNHAppSettings();

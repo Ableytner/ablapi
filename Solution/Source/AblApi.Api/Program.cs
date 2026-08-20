@@ -6,13 +6,14 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        DotEnv.LoadEnvVariables();
+        string environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "prod";
 
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Configuration.AddConfigProviders();
+
         builder.ConfigureLogging();
 
-        // Add services to the container.
         builder.Services.AddAppServices(builder.Configuration)
                         .AddEndpoints(builder.Configuration)
                         .AddDatabaseServices(builder.Configuration)

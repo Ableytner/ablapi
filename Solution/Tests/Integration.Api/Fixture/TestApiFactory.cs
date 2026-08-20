@@ -1,4 +1,5 @@
 ﻿using AblApi.Api;
+using AblApi.Api.Startup;
 using AblApi.DataAccess.Context;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,9 +23,14 @@ public class TestApiFactory(string databaseName, bool useRealAuth = false) : Web
 
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
 	{
-		builder.ConfigureServices((context, services) =>
+		builder.ConfigureAppConfiguration((context, config) =>
+        {
+            config.AddConfigProviders();
+        });
+
+        builder.ConfigureServices((context, services) =>
 		{
-			if (!_useRealAuth)
+            if (!_useRealAuth)
 			{
 				SetupAuth(services);
 			}

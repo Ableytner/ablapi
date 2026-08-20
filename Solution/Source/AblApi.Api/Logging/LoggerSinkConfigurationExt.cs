@@ -13,9 +13,8 @@ namespace AblApi.Api.Logging;
 
 public static class LoggerSinkConfigurationExt
 {
-    public static LoggerConfiguration Elasticsearch(this LoggerSinkConfiguration loggerConfiguration, IConfiguration config)
+    public static LoggerConfiguration Elasticsearch(this LoggerSinkConfiguration loggerConfiguration, ElkAppSettings elkConfig)
     {
-        var elkConfig = config.GetSection("ElkConfig").Get<ElkAppSettings>() ?? throw new InvalidOperationException("ElkConfig section is missing in the configuration.");
         var elasticsearchHttpUri = new Uri(elkConfig.ElkUrl);
 
         return loggerConfiguration.Elasticsearch([elasticsearchHttpUri], opts =>

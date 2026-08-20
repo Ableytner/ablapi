@@ -1,4 +1,4 @@
-﻿namespace AblApi.Api;
+﻿namespace AblApi.Common;
 
 // code from: https://dusted.codes/dotenv-in-dotnet
 public static class DotEnv

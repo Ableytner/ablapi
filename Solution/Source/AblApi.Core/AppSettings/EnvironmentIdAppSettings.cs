@@ -4,5 +4,5 @@ public class EnvironmentIdAppSettings
 {
 	public const string SectionName = "EnvironmentIdentifier";
 
-	public required string Id { get; set; }
+	public string Id { get; set; }
 }

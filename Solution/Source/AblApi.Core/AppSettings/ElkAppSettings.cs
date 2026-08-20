@@ -2,15 +2,17 @@
 
 public class ElkAppSettings
 {
-    public required string ElkUrl { get; set; }
+    public const string SectionName = "ElkConfig";
 
-    public required string ApiKey { get; set; }
+    public string ElkUrl { get; set; }
 
-    public string LogLevel { get; set; } = "Information";
+    public string ApiKey { get; set; }
 
-    public string DataStreamType { get; set; } = "abl";
+    public string LogLevel { get; set; }
 
-    public string DataStreamDataSet { get; set; } = "AblApi";
+    public string DataStreamType { get; set; }
 
-    public string DataStreamNamespace { get; set; } = "0001";
+    public string DataStreamDataSet { get; set; }
+
+    public string DataStreamNamespace { get; set; }
 }

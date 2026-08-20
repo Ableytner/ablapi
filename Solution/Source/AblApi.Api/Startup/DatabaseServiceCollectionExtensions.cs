@@ -12,7 +12,7 @@ public static class DatabaseServiceCollectionExtensions
         services.AddScoped<IAblRepository, AblRepository>();
         services.AddDbContext<AblContext>(options =>
             options.UseSqlite(
-                config.GetConnectionString("AblContext"),
+                config.GetConnectionString("DbConnection"),
                 sqlite => sqlite.CommandTimeout(120))
         );
 
