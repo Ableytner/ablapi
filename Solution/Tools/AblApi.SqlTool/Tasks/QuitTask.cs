@@ -8,7 +8,7 @@ public class QuitTask(AppConfig config) : BaseTask(config)
 
     public override string Command => "q";
 
-    public override void Run(string[] args)
+    public override void Run()
     {
         Environment.Exit(0);
     }

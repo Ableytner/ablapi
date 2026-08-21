@@ -14,7 +14,7 @@ public static class LoggingBuilderExtension
 
         var elkConfig = new ElkAppSettings();
         builder.Configuration.GetSection(ElkAppSettings.SectionName).Bind(elkConfig);
-        if (string.IsNullOrEmpty(elkConfig.ApiKey) || elkConfig.ApiKey == "APIKEY")
+        if (!builder.Environment.IsDevelopment() && (string.IsNullOrEmpty(elkConfig.ApiKey) || elkConfig.ApiKey == "APIKEY"))
         {
             throw new InvalidOperationException("ELK API key is not configured.");
         }
@@ -26,7 +26,7 @@ public static class LoggingBuilderExtension
                 .ReadFrom.Configuration(context.Configuration)
                 .Enrich.FromLogContext()
                 .Enrich.WithMachineName()
-                .Enrich.WithProperty("ASPNETCORE_ENVIRONMENT", context.HostingEnvironment.EnvironmentName);
+                .Enrich.WithProperty("DOTNET_ENVIRONMENT", context.HostingEnvironment.EnvironmentName);
 
             configuration.Enrich.With(new EnvironmentEnricher(environmentIdConfig));
 

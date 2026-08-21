@@ -42,12 +42,10 @@ public class Program
             if (string.IsNullOrEmpty(input))
                 continue;
 
-            var inputSplit = input.Split(' ');
-
             BaseTask? targetTask = null;
             foreach (var task in tasks)
             {
-                if (inputSplit[0] == task.Command)
+                if (input == task.Command)
                 {
                     targetTask = task;
                 }
@@ -59,7 +57,7 @@ public class Program
                 continue;
             }
 
-            targetTask.Run(inputSplit[1..]);
+            targetTask.Run();
         }
     }
 

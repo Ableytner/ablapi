@@ -216,7 +216,8 @@ public class HelloWorldControllerTests : TestBase
         var user = new ApiUser
         {
             Id = Guid.NewGuid(),
-            Name = "Test User"
+            Name = "Test User",
+            Token = Guid.NewGuid().ToString()
         };
 
         TestHelpers.AblContext.ApiUsers.Add(user);

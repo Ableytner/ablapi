@@ -6,7 +6,7 @@ public class MigrateTask : BaseTask
 {
     public override string Name => "Migrate";
 
-    public override string Description => "Migrates the database to the latest version.";
+    public override string Description => "Migrates the database to the latest version, creates the database if it doesn't exist.";
 
     public override string Command => "migrate";
 
@@ -17,7 +17,7 @@ public class MigrateTask : BaseTask
         _migrationHandler = new DbMigrationHandler(config.Database.Type, config.Database.Connection);
     }
 
-    public override void Run(string[] args)
+    public override void Run()
     {
         try
         {

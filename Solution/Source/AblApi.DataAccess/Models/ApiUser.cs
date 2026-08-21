@@ -6,5 +6,7 @@ public class ApiUser
 
     public string Name { get; set; }
 
+    public string Token { get; set; }
+
     public virtual ICollection<ApiAccessRoleGrant> Roles { get; set; } = new List<ApiAccessRoleGrant>();
 }

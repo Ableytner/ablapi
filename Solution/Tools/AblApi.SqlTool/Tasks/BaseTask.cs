@@ -10,5 +10,5 @@ public abstract class BaseTask(AppConfig config)
 
     protected AppConfig Config { get; } = config;
 
-    public abstract void Run(string[] args);
+    public abstract void Run();
 }

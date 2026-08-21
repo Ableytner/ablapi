@@ -16,16 +16,25 @@ public class ApiUserTests(InMemorySqliteDbFixture fixture) : IClassFixture<InMem
     public async Task ApiUserRepository_Upsert_PersistsChanges()
     {
         // Arrange
-        var guid = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var userToken = Guid.NewGuid().ToString();
         _fixture.AblContext.Add(
-            new ApiUser { Id = guid, Name = "Test User", Roles = [
-                new ApiAccessRoleGrant { Role = ApiAccessRole.Admin, GrantedAt = DateTime.UtcNow },
-                new ApiAccessRoleGrant { Role = ApiAccessRole.Log, GrantedAt = DateTime.UtcNow }
-                ] }
-            );
-        var updatedUser = new ApiUser {
-            Id = guid,
+            new ApiUser
+            {
+                Id = userId,
+                Name = "Test User",
+                Token = userToken,
+                Roles = [
+                    new ApiAccessRoleGrant { Role = ApiAccessRole.Admin, GrantedAt = DateTime.UtcNow },
+                    new ApiAccessRoleGrant { Role = ApiAccessRole.Log, GrantedAt = DateTime.UtcNow }
+                ]
+            }
+        );
+        var updatedUser = new ApiUser
+        {
+            Id = userId,
             Name = "Updated User",
+            Token = userToken,
             Roles = [
                 new ApiAccessRoleGrant { Role = ApiAccessRole.Log, GrantedAt = DateTime.UtcNow }
             ]
@@ -36,7 +45,7 @@ public class ApiUserTests(InMemorySqliteDbFixture fixture) : IClassFixture<InMem
         await _ablRepository.ApiUserRepository.UpsertAsync(updatedUser);
 
         // Assert
-        var result = await _ablRepository.ApiUserRepository.GetByIdAsync(guid);
+        var result = await _ablRepository.ApiUserRepository.GetByIdAsync(userId);
         Assert.NotNull(result);
         Assert.Equal("Updated User", result.Name);
         var grant = Assert.Single(result.Roles);

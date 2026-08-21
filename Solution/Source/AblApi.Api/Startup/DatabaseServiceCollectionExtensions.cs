@@ -1,6 +1,7 @@
 ﻿using AblApi.Common.Enums;
 using AblApi.Core.AppSettings;
 using AblApi.DataAccess.Context;
+using AblApi.DataAccess.Extensions;
 using AblApi.Repositories;
 using AblApi.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -22,18 +23,7 @@ public static class DatabaseServiceCollectionExtensions
         services.AddScoped<IAblRepository, AblRepository>();
         services.AddDbContext<AblContext>(options =>
         {
-            _ = dbConfig.Type switch
-            {
-                DatabaseType.Postgres => options.UseNpgsql(
-                    dbConfig.Connection,
-                    npgsql => npgsql.CommandTimeout(120)
-                ),
-                DatabaseType.Sqlite => options.UseSqlite(
-                    dbConfig.Connection,
-                    sqlite => sqlite.CommandTimeout(120)
-                ),
-                _ => throw new InvalidOperationException("Unknown database type")
-            };
+            options.ConfigureDatabase(dbConfig.Type, dbConfig.Connection);
         });
 
         return services;

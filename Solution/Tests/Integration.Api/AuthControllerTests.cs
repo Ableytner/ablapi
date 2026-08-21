@@ -3,7 +3,9 @@ using AblApi.Core.AppJwtToken.Dtos;
 using AblApi.DataAccess.Models;
 using Integration.Api.Fixture;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 
 namespace Integration.Api;
 
@@ -16,10 +18,12 @@ public class AuthControllerTests : TestBase
     {
         // Arrange
         var userId = Guid.NewGuid();
+        var userToken = Guid.NewGuid().ToString();
         var testUser = new ApiUser
         {
             Id = userId,
             Name = "TestUser",
+            Token = userToken,
             Roles = new List<ApiAccessRoleGrant>()
         };
         TestHelpers.AblContext.ApiUsers.Add(testUser);
@@ -41,7 +45,7 @@ public class AuthControllerTests : TestBase
 
         await TestHelpers.AblContext.SaveChangesAsync(CancellationToken);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/{userId}/");
+        var request = BuildAuthenticationRequest($"{BaseUrl}/", testUser.Id, userToken);
 
         // Act
         var response = await TestHelpers.Client.SendAsync(request, CancellationToken);
@@ -60,7 +64,8 @@ public class AuthControllerTests : TestBase
     {
         // Arrange
         var nonExistentUserId = Guid.NewGuid();
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/{nonExistentUserId}/");
+        var nonExistentUserToken = Guid.NewGuid().ToString();
+        var request = BuildAuthenticationRequest($"{BaseUrl}/", nonExistentUserId, nonExistentUserToken);
 
         // Act
         var response = await TestHelpers.Client.SendAsync(request, CancellationToken);
@@ -74,16 +79,18 @@ public class AuthControllerTests : TestBase
     {
         // Arrange
         var userId = Guid.NewGuid();
+        var userToken = Guid.NewGuid().ToString();
         var testUser = new ApiUser
         {
             Id = userId,
             Name = "TestUserNoRoles",
+            Token = userToken,
             Roles = new List<ApiAccessRoleGrant>()
         };
         TestHelpers.AblContext.ApiUsers.Add(testUser);
         await TestHelpers.AblContext.SaveChangesAsync(CancellationToken);
 
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/{userId}/");
+        var request = BuildAuthenticationRequest($"{BaseUrl}/", testUser.Id, userToken);
 
         // Act
         var response = await TestHelpers.Client.SendAsync(request, CancellationToken);
@@ -104,12 +111,58 @@ public class AuthControllerTests : TestBase
     public async Task Authenticate_WithInvalidGuidFormat_ReturnsNotFound(string invalidUserId)
     {
         // Arrange
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/{invalidUserId}/");
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/");
+        request.Headers.Authorization = new AuthenticationHeaderValue(
+            "Basic",
+            Convert.ToBase64String(Encoding.UTF8.GetBytes($"{invalidUserId}:sometoken"))
+        );
 
         // Act
         var response = await TestHelpers.Client.SendAsync(request, CancellationToken);
 
         // Assert
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    [Theory]
+    [InlineData("wrong-token")]
+    [InlineData("")]
+    [InlineData("ab")]
+    public async Task Authenticate_WithWrongToken_ReturnsForbid(string wrongToken)
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var userToken = Guid.NewGuid().ToString();
+        var testUser = new ApiUser
+        {
+            Id = userId,
+            Name = "TestUserWrongToken",
+            Token = userToken,
+            Roles = new List<ApiAccessRoleGrant>()
+        };
+        TestHelpers.AblContext.ApiUsers.Add(testUser);
+        await TestHelpers.AblContext.SaveChangesAsync(CancellationToken);
+
+        var request = BuildAuthenticationRequest($"{BaseUrl}/", testUser.Id, wrongToken);
+
+        // Act
+        var response = await TestHelpers.Client.SendAsync(request, CancellationToken);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    #region Helpers
+
+    private static HttpRequestMessage BuildAuthenticationRequest(string url, Guid userId, string token)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue(
+            "Basic",
+            Convert.ToBase64String(Encoding.UTF8.GetBytes($"{userId}:{token}"))
+        );
+        return request;
+    }
+
+    #endregion
 }
