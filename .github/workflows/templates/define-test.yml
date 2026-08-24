@@ -1,0 +1,26 @@
+name: Test the project
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-push:
+    runs-on: [self-hosted, linux]
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: '10.x'
+    - name: Restore
+      run: |
+        dotnet restore ./Solution/AblApi.slnx
+    - name: Unit tests
+      run: |
+        dotnet test ./Solution/AblApi.slnx --no-restore --project Tests.Unit.Api.csproj --verbosity normal --logger "console;verbosity=detailed"
+    - name: Integration tests
+      run: |
+        dotnet test ./Solution/AblApi.slnx --no-restore --project Tests.Integration.Api.csproj --verbosity normal --logger "console;verbosity=detailed"

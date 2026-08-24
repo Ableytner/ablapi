@@ -8,7 +8,7 @@ public static class ConfigurationBuilderExtensions
     {
         DotEnv.LoadEnvVariables();
 
-        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")?.ToLower();
 
         configuration.SetBasePath(Directory.GetCurrentDirectory());
         configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);

@@ -1,0 +1,16 @@
+name: Build images
+
+on: 
+  pull_request:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-push:
+    uses: ./.github/workflows/templates/define-build-push.yml
+    with:
+      push_image: false
+    secrets: inherit

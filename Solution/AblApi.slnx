@@ -1,13 +1,12 @@
 <Solution>
   <Folder Name="/Info, Build, Repo/">
+    <File Path="../.github/workflows/build.yml" />
+    <File Path="../.github/workflows/pr.yml" />
+    <File Path="../.github/workflows/run-release.yml" />
     <File Path="../.github/workflows/delete-untagged-images.yml" />
-    <File Path="../.github/workflows/release-tagged-image.yml" />
-    <File Path="../.github/workflows/run-tests.yml" />
   </Folder>
   <Folder Name="/Info, Build, Repo/templates/">
-    <File Path="../.github/workflows/templates/define-build-image.yml" />
-    <File Path="../.github/workflows/templates/define-pylint.yml" />
-    <File Path="../.github/workflows/templates/define-pytest.yml" />
+    <File Path="../.github/workflows/templates/build-push.yml" />
   </Folder>
   <Folder Name="/Source/" />
   <Folder Name="/Source/Api/">
