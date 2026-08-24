@@ -20,7 +20,7 @@ jobs:
         dotnet restore ./Solution/AblApi.slnx
     - name: Unit tests
       run: |
-        dotnet test ./Solution/AblApi.slnx --no-restore --project Tests.Unit.Api.csproj --verbosity normal --logger "console;verbosity=detailed"
+        dotnet test ./Solution/Tests/Unit.Api/Tests.Unit.Api.csproj --no-restore --verbosity normal -- --output Detailed
     - name: Integration tests
       run: |
-        dotnet test ./Solution/AblApi.slnx --no-restore --project Tests.Integration.Api.csproj --verbosity normal --logger "console;verbosity=detailed"
+        dotnet test ./Solution/Tests/Integration.Api/Tests.Integration.Api.csproj --no-restore --verbosity normal -- --output Detailed
