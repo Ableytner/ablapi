@@ -1,15 +1,11 @@
 ﻿using AblApi.DataAccess.Models;
 using AblApi.DataAccess.Models.GTNH;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Logging;
 
 namespace AblApi.DataAccess.Context;
 
-public class AblContext(DbContextOptions<AblContext> options, ILogger<AblContext> logger) : DbContext(options)
+public class AblContext(DbContextOptions<AblContext> options) : DbContext(options)
 {
-    private readonly ILogger<AblContext> _logger = logger;
-
     public virtual DbSet<ApiUser> ApiUsers { get; set; }
 
     public virtual DbSet<ApiAccessRoleGrant> ApiAccessRoleGrants { get; set; }
@@ -71,26 +67,5 @@ public class AblContext(DbContextOptions<AblContext> options, ILogger<AblContext
             entity.Property(e => e.AppliedAt).HasColumnType("datetime");
             entity.Property(e => e.ScriptName).HasMaxLength(255);
         });
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.LogTo((eventId, level) => true, Logger);
-    }
-
-    private void Logger(EventData data)
-    {
-        if (_logger is null)
-        {
-            return;
-        }
-        switch (data.LogLevel)
-        {
-            case LogLevel.Information: _logger.LogInformation(data.ToString()); break;
-            case LogLevel.Debug: _logger.LogDebug(data.ToString()); break;
-            case LogLevel.Warning: _logger.LogWarning(data.ToString()); break;
-            case LogLevel.Error: _logger.LogError(data.ToString()); break;
-            default: _logger.LogTrace(data.ToString()); break;
-        }
     }
 }

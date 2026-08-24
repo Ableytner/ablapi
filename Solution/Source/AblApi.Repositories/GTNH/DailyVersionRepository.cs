@@ -12,9 +12,9 @@ public class DailyVersionRepository(AblContext context) : GenericRepository<Dail
         return await Context.GTNHDailyVersions.FirstOrDefaultAsync(x => x.RunNumber == runNumber);
     }
 
-    public async Task<DailyVersion> GetLatestAsync()
+    public async Task<DailyVersion?> GetLatestAsync()
     {
-        return await Context.GTNHDailyVersions.OrderByDescending(x => x.RunNumber).FirstAsync();
+        return await Context.GTNHDailyVersions.OrderByDescending(x => x.RunNumber).FirstOrDefaultAsync();
     }
 
     public async new Task<List<DailyVersion>> GetAllAsListAsync()

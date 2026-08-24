@@ -1,7 +1,5 @@
 ﻿using AblApi.DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Tests.Common.Extensions;
 
 namespace Tests.Common.Mocks;
@@ -14,11 +12,9 @@ public static class DbContextMocker
 	{
 		_lock.Enter();
 
-		ILogger<AblContext> logger = Substitute.For<ILogger<AblContext>>();
-
 		var options = GetSqliteOptionsInMemory(dbName);
 
-        var dbContext = new AblContext(options, logger);
+		var dbContext = new AblContext(options);
 		dbContext.Database.OpenConnection();
 		dbContext.Database.EnsureCreated();
 		Task.Run(async () => await dbContext.SeedInMemory()).Wait();

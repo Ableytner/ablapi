@@ -7,11 +7,15 @@ using Microsoft.Extensions.Logging;
 
 namespace AblApi.GTNH;
 
-public class GTNHService(ILogger<GTNHService> logger, GTNHAppSettings gtnhConfiguration, IGithubService githubApiService, IAblRepository ablRepository) : IGTNHService
+/// <summary>
+/// Central service for any GTNH related operations.
+/// </summary>
+public class GTNHService(ILogger<GTNHService> logger, GTNHAppSettings gtnhConfiguration, IGithubService githubApiService, IGTNewHorizonsService gtNewHorizonsService, IAblRepository ablRepository) : IGTNHService
 {
     private readonly ILogger<GTNHService> _logger = logger;
     private readonly GTNHAppSettings _gtnhConfiguration = gtnhConfiguration;
     private readonly IGithubService _githubService = githubApiService;
+    private readonly IGTNewHorizonsService _gtNewHorizonsService = gtNewHorizonsService;
     private readonly IAblRepository _ablRepository = ablRepository;
 
     public async Task<bool> TestToken()
@@ -68,7 +72,7 @@ public class GTNHService(ILogger<GTNHService> logger, GTNHAppSettings gtnhConfig
         var dbRun = await _ablRepository.GTNHDailyVersionRepository.GetByRunNumberAsync(dailyVersionNumber);
         if (dbRun != null)
         {
-            return DailyVersionDto.Map(dbRun);
+            return DailyVersionDto.FromDbo(dbRun);
         }
 
         var workflowRun = await _githubService.GetOneWorkflowRunAsync(
@@ -85,10 +89,20 @@ public class GTNHService(ILogger<GTNHService> logger, GTNHAppSettings gtnhConfig
 
         var dto = await MapWorkflowRunToDailyVersionDto(workflowRun);
 
-        _ablRepository.GTNHDailyVersionRepository.Add(dto.Map());
+        _ablRepository.GTNHDailyVersionRepository.Add(dto.ToDbo());
         await _ablRepository.SaveChangesAsync();
 
         return dto;
+    }
+
+    public async Task<StableVersionDto> GetLatestStableVersionAsync(CancellationToken cancellationToken = default)
+    {
+        return await _gtNewHorizonsService.GetLatestStableVersionAsync(cancellationToken);
+    }
+
+    public async Task<StableVersionDto?> GetSpecificStableVersionAsync(string version, CancellationToken cancellationToken = default)
+    {
+        return await _gtNewHorizonsService.GetSpecificStableVersionAsync(version, cancellationToken);
     }
 
     private async Task<DailyVersionDto> MapWorkflowRunToDailyVersionDto(WorkflowRunDto workflowRun)

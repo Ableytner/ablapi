@@ -45,7 +45,7 @@ public class AuthController(ILogger<AuthController> logger, IAblRepository ablRe
             var jwtToken = _jwtTokenService.CreateToken(userId, roles);
 
             _logger.LogInformation("AuthController.Authenticate: User {UserId} authenticated successfully", userId);
-            return Ok(jwtToken.Map());
+            return Ok(jwtToken.ToDto());
         }
         catch (Exception ex)
         {

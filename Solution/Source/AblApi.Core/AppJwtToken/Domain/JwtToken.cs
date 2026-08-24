@@ -8,7 +8,7 @@ public class JwtToken
 
     public required DateTime ExpiresAt { get; set; }
 
-    public JwtTokenDto Map()
+    public JwtTokenDto ToDto()
     {
         return new JwtTokenDto
         {

@@ -4,7 +4,6 @@ using AblApi.DataAccess.Extensions;
 using AblApi.DataAccess.Models;
 using AblApi.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.Security.Cryptography;
 
 namespace AblApi.SqlTool.Tasks;
@@ -143,7 +142,7 @@ public class CreateApiUserTask(AppConfig config) : BaseTask(config)
         var optionsBuilder = new DbContextOptionsBuilder<AblContext>();
         optionsBuilder.ConfigureDatabase(Config.Database.Type, Config.Database.Connection);
 
-        return new AblContext(optionsBuilder.Options, NullLogger<AblContext>.Instance);
+        return new AblContext(optionsBuilder.Options);
     }
 
     private static string GenerateToken()

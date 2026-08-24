@@ -11,4 +11,8 @@ public interface IGTNHService
     public Task<DailyVersionDto> GetLatestDailyVersionAsync(bool? success = null, CancellationToken cancellationToken = default);
 
     public Task<DailyVersionDto?> GetSpecificDailyVersionAsync(int dailyVersionId, CancellationToken cancellationToken = default);
+
+    public Task<StableVersionDto> GetLatestStableVersionAsync(CancellationToken cancellationToken = default);
+
+    public Task<StableVersionDto?> GetSpecificStableVersionAsync(string version, CancellationToken cancellationToken = default);
 }

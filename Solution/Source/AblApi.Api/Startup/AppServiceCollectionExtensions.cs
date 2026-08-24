@@ -21,7 +21,9 @@ internal static class AppServiceCollectionExtensions
 
         services.AddSingleton<IGithubHttpClient, GithubHttpClient>();
         services.AddTransient<IGithubService, GithubService>();
+        services.AddTransient<IGTNewHorizonsService, GTNewHorizonsService>();
         services.AddTransient<IGTNHService, GTNHService>();
+        services.AddHostedService<GTNHBackgroundService>();
 
         services.AddLocalization();
 

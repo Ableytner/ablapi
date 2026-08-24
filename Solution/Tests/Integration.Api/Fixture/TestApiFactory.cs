@@ -8,9 +8,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Tests.Common.Mocks;
 
 namespace Integration.Api.Fixture;
@@ -74,10 +72,6 @@ public class TestApiFactory(string databaseName, bool useRealAuth = false) : Web
 		// Register DbContext options that will create separate instances sharing the same in-memory database
 		var options = DbContextMocker.GetSqliteOptionsInMemory(_databaseName);
 
-		services.AddScoped<AblContext>(sp =>
-		{
-			var logger = sp.GetService<ILogger<AblContext>>() ?? Substitute.For<ILogger<AblContext>>();
-			return new AblContext(options, logger);
-		});
+		services.AddScoped<AblContext>(sp => new AblContext(options));
 	}
 }

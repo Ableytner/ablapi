@@ -4,6 +4,9 @@ using System.Text.Json;
 
 namespace AblApi.Core.AppGithub;
 
+/// <summary>
+/// Service for interacting with the GitHub API.
+/// </summary>
 public class GithubService(ILogger<GithubService> logger, IGithubHttpClient httpClient) : IGithubService
 {
     private readonly int _workflowsPerPage = 100;
@@ -174,7 +177,7 @@ public class GithubService(ILogger<GithubService> logger, IGithubHttpClient http
         }
 
         var url = $"repos/{owner}/{repo}/actions/workflows/{workflowId}/runs?page={page}&per_page={perPage}";
-        _logger.LogInformation("Fetching paged workflow runs from {Url}", url);
+        _logger.LogInformation("Fetching paged workflow runs: {Url}", url);
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();

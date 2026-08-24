@@ -8,15 +8,18 @@ public class StableVersionDto
     [JsonPropertyName("version")]
     public required string Version { get; set; }
 
+    [JsonPropertyName("created_at")]
+    public required DateTime CreatedAt { get; set; }
+
     [JsonPropertyName("downloads")]
     public required DownloadUrlsDto DownloadUrls { get; set; }
 
-    public StableVersion Map()
+    public StableVersion ToDbo()
     {
         return new StableVersion
         {
             Version = this.Version,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = this.CreatedAt,
             ClientDownloadUrl = this.DownloadUrls.Client,
             ClientDownloadUrlJava8 = this.DownloadUrls.ClientJava8,
             ServerDownloadUrl = this.DownloadUrls.Server,

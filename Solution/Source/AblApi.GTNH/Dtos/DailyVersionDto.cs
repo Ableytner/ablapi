@@ -29,7 +29,7 @@ public class DailyVersionDto
     [JsonPropertyName("downloads")]
     public required DownloadUrlsDto? DownloadUrls { get; set; }
 
-    public DailyVersion Map()
+    public DailyVersion ToDbo()
     {
         return new DailyVersion
         {
@@ -47,7 +47,7 @@ public class DailyVersionDto
         };
     }
 
-    public static DailyVersionDto Map(DailyVersion version)
+    public static DailyVersionDto FromDbo(DailyVersion version)
     {
         DownloadUrlsDto? downloadUrls = null;
         if (version.ClientDownloadUrl != null && version.ClientDownloadUrlJava8 != null && version.ServerDownloadUrl != null && version.ServerDownloadUrlJava8 != null)

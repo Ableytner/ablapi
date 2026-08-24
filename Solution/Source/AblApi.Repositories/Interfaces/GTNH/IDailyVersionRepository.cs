@@ -6,5 +6,5 @@ public interface IDailyVersionRepository : IGenericRepository<DailyVersion>
 {
     public Task<DailyVersion?> GetByRunNumberAsync(int runNumber);
 
-    public Task<DailyVersion> GetLatestAsync();
+    public Task<DailyVersion?> GetLatestAsync();
 }
