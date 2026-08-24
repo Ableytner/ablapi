@@ -10,11 +10,16 @@ defaults:
     shell: bash
 
 jobs:
+  test:
+    uses: ./.github/workflows/define-test.yml
+    secrets: inherit
+
   build-push:
+    requires: [test]
     permissions:
       contents: read
       packages: write
-    uses: ./.github/workflows/templates/define-build-push.yml
+    uses: ./.github/workflows/define-build-push.yml
     with:
       push_image: true
     secrets: inherit

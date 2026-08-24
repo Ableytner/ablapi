@@ -8,7 +8,7 @@ defaults:
     shell: bash
 
 jobs:
-  build-push:
+  test:
     runs-on: [self-hosted, linux]
     steps:
     - uses: actions/checkout@v7

@@ -32,12 +32,16 @@ jobs:
       run: |
         echo "Tag ${{ github.event.inputs.version_number }} doesn't yet exist and can be created"
 
+  test:
+    uses: ./.github/workflows/define-test.yml
+    secrets: inherit
+
   build-push:
-    needs: [tag]
+    needs: [tag, test]
     permissions:
       contents: read
       packages: write
-    uses: ./.github/workflows/templates/define-build-push.yml
+    uses: ./.github/workflows/define-build-push.yml
     with:
       version_number: ${{ github.event.inputs.version_number }}
       push_image: true
