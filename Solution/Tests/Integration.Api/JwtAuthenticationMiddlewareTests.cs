@@ -12,7 +12,7 @@ namespace Integration.Api;
 /// (configured by AddAuth) directly, instead of going through the test-only
 /// <see cref="TestAuthHandler"/> header-based bypass used by the other integration tests.
 /// </summary>
-public class JwtAuthenticationMiddlewareTests : TestBase
+public class JwtAuthenticationMiddlewareTests : RealAuthTestBase
 {
     private const string RegisteredEndpoint = "api/hello-world/private/";
     private const string AdminEndpoint = "api/hello-world/admin/";
@@ -20,7 +20,7 @@ public class JwtAuthenticationMiddlewareTests : TestBase
     private readonly JwtAppSettings _jwtSettings;
     private readonly IJwtTokenService _jwtTokenService;
 
-    public JwtAuthenticationMiddlewareTests() : base(useRealAuth: true)
+    public JwtAuthenticationMiddlewareTests()
     {
         _jwtSettings = TestHelpers.ApiFactory.Services.GetRequiredService<JwtAppSettings>();
         _jwtTokenService = TestHelpers.ApiFactory.Services.GetRequiredService<IJwtTokenService>();

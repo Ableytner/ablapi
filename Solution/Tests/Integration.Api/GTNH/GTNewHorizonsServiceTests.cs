@@ -1,7 +1,7 @@
 using AblApi.GTNH;
 using Integration.Api.Fixture;
 
-namespace Integration.Api;
+namespace Integration.Api.GTNH;
 
 public class GTNewHorizonsServiceTests : TestBase
 {
@@ -67,6 +67,6 @@ public class GTNewHorizonsServiceTests : TestBase
 
     private static string GetVersionsJson()
     {
-        return File.ReadAllText("Data/gtnh_versions.json");
+        return File.ReadAllText("GTNH/Data/versions.json");
     }
 }

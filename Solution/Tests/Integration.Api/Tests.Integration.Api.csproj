@@ -45,7 +45,7 @@
 	<None Update="Data\workflowruns_100_page2.json">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</None>
-	<None Update="Data\gtnh_versions.json">
+	<None Update="GTNH\Data\versions.json">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</None>
   </ItemGroup>

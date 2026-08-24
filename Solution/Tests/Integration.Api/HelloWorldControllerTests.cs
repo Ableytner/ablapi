@@ -8,13 +8,13 @@ using System.Net.Http.Headers;
 
 namespace Integration.Api;
 
-public class HelloWorldControllerTests : TestBase
+public class HelloWorldControllerTests : RealAuthTestBase
 {
     private const string BaseUrl = "api/hello-world";
 
     private readonly IJwtTokenService _jwtTokenService;
 
-    public HelloWorldControllerTests() : base(useRealAuth: true)
+    public HelloWorldControllerTests()
     {
         _jwtTokenService = TestHelpers.ApiFactory.Services.GetRequiredService<IJwtTokenService>();
     }

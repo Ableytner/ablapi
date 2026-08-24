@@ -38,4 +38,30 @@ public class GTNHController(ILogger<GTNHController> logger, IGTNHService gtnhMan
         }
         return Ok(dailyVersion);
     }
+
+    [HttpGet("stable/latest")]
+    [AccessLevel(AccessLevelType.PublicInternetAccess)]
+    public async Task<ActionResult<StableVersionDto>> GetLatestStableVersion()
+    {
+        var stableVersion = await _gtnhManager.GetLatestStableVersionAsync();
+
+        if (stableVersion == null)
+        {
+            return NotFound();
+        }
+        return Ok(stableVersion);
+    }
+
+    [HttpGet("stable/{stableVersion}")]
+    [AccessLevel(AccessLevelType.PublicInternetAccess)]
+    public async Task<ActionResult<StableVersionDto>> GetSpecificStableVersion([FromRoute] string stableVersion)
+    {
+        var stableVersionDto = await _gtnhManager.GetSpecificStableVersionAsync(stableVersion);
+
+        if (stableVersionDto == null)
+        {
+            return NotFound();
+        }
+        return Ok(stableVersionDto);
+    }
 }

@@ -22,6 +22,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.10.0" />
     <PackageReference Include="AutoBogus" Version="2.13.1" />
+    <PackageReference Include="NSubstitute" Version="6.2.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
@@ -29,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Source\AblApi.Repositories\AblApi.Repositories.csproj" />
     <ProjectReference Include="..\..\Source\AblApi.Api\AblApi.Api.csproj" />
+    <ProjectReference Include="..\..\Source\AblApi.GTNH\AblApi.GTNH.csproj" />
     <ProjectReference Include="..\Tests.Common\Tests.Common.csproj" />
   </ItemGroup>
 </Project>
