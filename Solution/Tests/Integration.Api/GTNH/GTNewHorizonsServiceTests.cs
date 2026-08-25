@@ -38,16 +38,18 @@ public class GTNewHorizonsServiceTests : TestBase
     }
 
     [Fact]
-    public async Task GetSpecificStableVersionAsync_MissingVersion_ThrowsInvalidOperationException()
+    public async Task GetSpecificStableVersionAsync_MissingVersion_ReturnsNull()
     {
         // Arrange
         using var server = new MockHttpServer(GetVersionsJson());
         var appSettings = new GTNHAppSettings { StableVersionApiUrl = server.Url };
         var service = new GTNewHorizonsService(appSettings);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.GetSpecificStableVersionAsync("9.9.9", CancellationToken));
+        // Act
+        var result = await service.GetSpecificStableVersionAsync("9.9.9", CancellationToken);
+
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]

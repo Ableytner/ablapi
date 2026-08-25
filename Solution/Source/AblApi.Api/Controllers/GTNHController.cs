@@ -29,14 +29,14 @@ public class GTNHController(ILogger<GTNHController> logger, IGTNHService gtnhMan
         return Ok(dailyVersion);
     }
 
-    [HttpGet("daily/{dailyVersionId}")]
+    [HttpGet("daily/{runNumber:int}")]
     [AccessLevel(AccessLevelType.PublicInternetAccess)]
     [EndpointSummary("Get a specific daily GTNH version")]
     [ProducesResponseType(typeof(DailyVersionDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DailyVersionDto>> GetSpecificDailyVersion([FromRoute] int dailyVersionId)
+    public async Task<ActionResult<DailyVersionDto>> GetSpecificDailyVersion([FromRoute] int runNumber)
     {
-        var dailyVersion = await _gtnhManager.GetSpecificDailyVersionAsync(dailyVersionId);
+        var dailyVersion = await _gtnhManager.GetSpecificDailyVersionAsync(runNumber);
 
         if (dailyVersion == null)
         {

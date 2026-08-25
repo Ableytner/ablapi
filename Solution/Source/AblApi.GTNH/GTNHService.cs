@@ -67,9 +67,9 @@ public class GTNHService(ILogger<GTNHService> logger, GTNHAppSettings gtnhConfig
         return await MapWorkflowRunToDailyVersionDto(latestRun);
     }
 
-    public async Task<DailyVersionDto?> GetSpecificDailyVersionAsync(int dailyVersionNumber, CancellationToken cancellationToken = default)
+    public async Task<DailyVersionDto?> GetSpecificDailyVersionAsync(int runNumber, CancellationToken cancellationToken = default)
     {
-        var dbRun = await _ablRepository.GTNHDailyVersionRepository.GetByRunNumberAsync(dailyVersionNumber);
+        var dbRun = await _ablRepository.GTNHDailyVersionRepository.GetByRunNumberAsync(runNumber);
         if (dbRun != null)
         {
             return DailyVersionDto.FromDbo(dbRun);
@@ -79,7 +79,7 @@ public class GTNHService(ILogger<GTNHService> logger, GTNHAppSettings gtnhConfig
             _gtnhConfiguration.DailyBuildsRepoOwner,
             _gtnhConfiguration.DailyBuildsRepoName,
             _gtnhConfiguration.DailyBuildsWorkflowId,
-            run => run.RunNumber == dailyVersionNumber,
+            run => run.RunNumber == runNumber,
             cancellationToken);
 
         if (workflowRun == null)

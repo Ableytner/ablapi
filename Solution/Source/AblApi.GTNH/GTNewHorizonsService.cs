@@ -36,7 +36,7 @@ public class GTNewHorizonsService(GTNHAppSettings appSettings) : IGTNewHorizonsS
 
         if (!versionsDict.TryGetValue(version, out var versionEntry))
         {
-            throw new InvalidOperationException($"Version '{version}' not found in the versions.json.");
+            return null;
         }
 
         return versionEntry.ToDto(version);

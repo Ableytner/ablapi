@@ -1,3 +1,4 @@
+using AblApi.Api.ExceptionHandling;
 using AblApi.Api.Startup;
 
 namespace AblApi.Api;
@@ -21,6 +22,9 @@ public class Program
 
         builder.Services.AddOpenApi();
 
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+        builder.Services.AddProblemDetails();
+
         builder.Services.AddControllers()
             .AddJsonOptions(options => {
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
@@ -28,6 +32,9 @@ public class Program
             });
 
         var app = builder.Build();
+
+        // Unhandled exceptions in Development environment reply with a detailed error json response
+        app.UseExceptionHandler();
 
         if (app.Environment.IsDevelopment())
         {
@@ -37,13 +44,6 @@ public class Program
                 options.SwaggerEndpoint("/openapi/v1.json", "AblApi v1");
                 options.RoutePrefix = "swagger";
             });
-            // TODO: log stack trace in development environment
-            // app.UseExceptionHandler("/error-development");
-        }
-        else
-        {
-            // TODO: log error message only
-            // app.UseExceptionHandler("/error");
         }
 
         // TODO: HTTPS communication with reverse proxy
