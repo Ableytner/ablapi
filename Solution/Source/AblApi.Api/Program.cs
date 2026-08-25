@@ -19,8 +19,7 @@ public class Program
                         .AddDatabaseServices(builder.Configuration)
                         .AddAuth(builder.Configuration);
 
-        // TODO: configure OpenAPI (https://aka.ms/aspnet/openapi)
-        // builder.Services.AddOpenApi();
+        builder.Services.AddOpenApi();
 
         builder.Services.AddControllers()
             .AddJsonOptions(options => {
@@ -33,6 +32,11 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/openapi/v1.json", "AblApi v1");
+                options.RoutePrefix = "swagger";
+            });
             // TODO: log stack trace in development environment
             // app.UseExceptionHandler("/error-development");
         }

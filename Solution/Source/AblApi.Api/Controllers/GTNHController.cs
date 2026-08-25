@@ -15,6 +15,9 @@ public class GTNHController(ILogger<GTNHController> logger, IGTNHService gtnhMan
 
     [HttpGet("daily/latest")]
     [AccessLevel(AccessLevelType.PublicInternetAccess)]
+    [EndpointSummary("Get the latest daily GTNH version")]
+    [ProducesResponseType(typeof(DailyVersionDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DailyVersionDto>> GetLatestDailyVersion([FromQuery] bool? success = null)
     {
         var dailyVersion = await _gtnhManager.GetLatestDailyVersionAsync(success);
@@ -28,6 +31,9 @@ public class GTNHController(ILogger<GTNHController> logger, IGTNHService gtnhMan
 
     [HttpGet("daily/{dailyVersionId}")]
     [AccessLevel(AccessLevelType.PublicInternetAccess)]
+    [EndpointSummary("Get a specific daily GTNH version")]
+    [ProducesResponseType(typeof(DailyVersionDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DailyVersionDto>> GetSpecificDailyVersion([FromRoute] int dailyVersionId)
     {
         var dailyVersion = await _gtnhManager.GetSpecificDailyVersionAsync(dailyVersionId);
@@ -41,6 +47,9 @@ public class GTNHController(ILogger<GTNHController> logger, IGTNHService gtnhMan
 
     [HttpGet("stable/latest")]
     [AccessLevel(AccessLevelType.PublicInternetAccess)]
+    [EndpointSummary("Get the latest stable GTNH version")]
+    [ProducesResponseType(typeof(StableVersionDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StableVersionDto>> GetLatestStableVersion()
     {
         var stableVersion = await _gtnhManager.GetLatestStableVersionAsync();
@@ -54,6 +63,9 @@ public class GTNHController(ILogger<GTNHController> logger, IGTNHService gtnhMan
 
     [HttpGet("stable/{stableVersion}")]
     [AccessLevel(AccessLevelType.PublicInternetAccess)]
+    [EndpointSummary("Get a specific stable GTNH version")]
+    [ProducesResponseType(typeof(StableVersionDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StableVersionDto>> GetSpecificStableVersion([FromRoute] string stableVersion)
     {
         var stableVersionDto = await _gtnhManager.GetSpecificStableVersionAsync(stableVersion);
