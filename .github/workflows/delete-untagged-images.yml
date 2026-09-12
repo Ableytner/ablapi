@@ -11,14 +11,14 @@ defaults:
 
 jobs:
   delete-untagged:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux]
     permissions:
       packages: write
     steps:
     - name: lowercase github.repository
       run: |
         echo "PACKAGE_NAME=`echo ${{github.repository}} | tr '[:upper:]' '[:lower:]' | cut -d "/" -f2`" >>${GITHUB_ENV}
-    - uses: dataaxiom/ghcr-cleanup-action@v1
+    - uses: dataaxiom/ghcr-cleanup-action@v1.2.2
       with:
         package: ${{ env.PACKAGE_NAME }}
         delete-untagged: true

@@ -1,0 +1,27 @@
+name: Test the project
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    runs-on: [self-hosted, linux]
+    steps:
+    - uses: actions/checkout@v7
+    - name: Restore
+      run: |
+        dotnet restore ./Solution/AblApi.slnx
+    - name: Unit tests
+      run: |
+        dotnet test --project ./Solution/Tests/Unit.Api/Tests.Unit.Api.csproj --no-restore --verbosity normal -- --output Detailed
+      env:
+        GithubConfig__Token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Integration tests
+      run: |
+        dotnet test --project ./Solution/Tests/Integration.Api/Tests.Integration.Api.csproj --no-restore --verbosity normal -- --output Detailed
+      env:
+        GithubConfig__Token: ${{ secrets.GITHUB_TOKEN }}
