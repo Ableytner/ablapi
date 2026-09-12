@@ -20,5 +20,5 @@ jobs:
       packages: write
     uses: ./.github/workflows/define-build-push.yml
     with:
-      push_image: false
+      push_image: true
     secrets: inherit
