@@ -1,8 +1,8 @@
-﻿using AblApi.DataAccess;
+using AblApi.DataAccess;
 
 namespace AblApi.SqlTool.Tasks;
 
-public class MigrateTask : BaseTask
+public class MigrateTask(AppConfig config) : BaseTask(config)
 {
     public override string Name => "Migrate";
 
@@ -10,14 +10,14 @@ public class MigrateTask : BaseTask
 
     public override string Command => "migrate";
 
-    private readonly DbMigrationHandler _migrationHandler;
+    private readonly DbMigrationHandler _migrationHandler = new(config.Database.Type, config.Database.Connection);
 
-    public MigrateTask(AppConfig config) : base(config)
+    public override void RunInteractive()
     {
-        _migrationHandler = new DbMigrationHandler(config.Database.Type, config.Database.Connection);
+        RunCi([]);
     }
 
-    public override void Run()
+    public override void RunCi(string[] _)
     {
         try
         {

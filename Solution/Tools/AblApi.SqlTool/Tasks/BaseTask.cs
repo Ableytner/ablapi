@@ -1,4 +1,4 @@
-﻿namespace AblApi.SqlTool.Tasks;
+namespace AblApi.SqlTool.Tasks;
 
 public abstract class BaseTask(AppConfig config)
 {
@@ -10,5 +10,7 @@ public abstract class BaseTask(AppConfig config)
 
     protected AppConfig Config { get; } = config;
 
-    public abstract void Run();
+    public abstract void RunInteractive();
+
+    public abstract void RunCi(string[] args);
 }

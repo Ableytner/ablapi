@@ -1,8 +1,7 @@
-﻿using AblApi.Api.Startup;
+using AblApi.Api.Startup;
 using AblApi.Common;
 using AblApi.Core.AppSettings;
 using AblApi.SqlTool.Tasks;
-using Elastic.CommonSchema;
 using Microsoft.Extensions.Configuration;
 
 namespace AblApi.SqlTool;
@@ -11,12 +10,23 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        var config = GetAppConfig();
+        var tasks = GetAllTasks(config);
+
+        if (args.Contains("--ci"))
+        {
+            RunNonInteractive(tasks, args);
+            return;
+        }
+
+        RunInteractive(tasks);
+    }
+
+    private static void RunInteractive(List<BaseTask> tasks)
+    {
         Console.WriteLine(Util.GetSeparator());
         Console.WriteLine("Sql Tool for database interfacing");
         Console.WriteLine(Util.GetSeparator());
-
-        var config = GetAppConfig();
-        var tasks = GetAllTasks(config);
 
         while (true)
         {
@@ -57,8 +67,21 @@ public class Program
                 continue;
             }
 
-            targetTask.Run();
+            targetTask.RunInteractive();
         }
+    }
+
+    private static void RunNonInteractive(List<BaseTask> tasks, string[] args)
+    {
+        var requestedCommand = args[0];
+        var command = tasks.FirstOrDefault(t => t.Command == requestedCommand);
+        if (command == null)
+        {
+            Console.WriteLine($"Unknown command: {requestedCommand}");
+            Environment.Exit(1);
+        }
+
+        command.RunCi(args[1..]);
     }
 
     private static AppConfig GetAppConfig()

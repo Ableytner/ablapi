@@ -1,4 +1,4 @@
-﻿namespace AblApi.SqlTool.Tasks;
+namespace AblApi.SqlTool.Tasks;
 
 public class QuitTask(AppConfig config) : BaseTask(config)
 {
@@ -8,7 +8,12 @@ public class QuitTask(AppConfig config) : BaseTask(config)
 
     public override string Command => "q";
 
-    public override void Run()
+    public override void RunInteractive()
+    {
+        Environment.Exit(0);
+    }
+
+    public override void RunCi(string[] _)
     {
         Environment.Exit(0);
     }

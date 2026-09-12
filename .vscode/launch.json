@@ -1,0 +1,71 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Background (https 44332, no browser)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Solution/Source/AblApi.Api/bin/Debug/net10.0/AblApi.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Solution/Source/AblApi.Api",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "none",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:44332;http://localhost:44331"
+            }
+        },
+        {
+            "name": "Swagger (https 44332)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Solution/Source/AblApi.Api/bin/Debug/net10.0/AblApi.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Solution/Source/AblApi.Api",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://[^\\\\s;]+)",
+                "uriFormat": "{0}/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "https://localhost:44332;http://localhost:44331"
+            }
+        },
+        {
+            "name": "Container (Dockerfile)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "docker-build",
+            "program": "${workspaceFolder}/Solution/Source/AblApi.Api/bin/Debug/net10.0/AblApi.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Solution/Source/AblApi.Api",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_HTTPS_PORTS": "8081",
+                "ASPNETCORE_HTTP_PORTS": "8080"
+            }
+        },
+        {
+            "name": "AblApi.SqlTool",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "buildSqlTool",
+            "program": "${workspaceFolder}/Solution/Tools/AblApi.SqlTool/bin/Debug/net10.0/AblApi.SqlTool.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Solution/Tools/AblApi.SqlTool",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        }
+    ]
+}

@@ -16,7 +16,7 @@ public class CreateApiUserTask(AppConfig config) : BaseTask(config)
 
     public override string Command => "createuser";
 
-    public override void Run()
+    public override void RunInteractive()
     {
         Console.Write("Enter ApiUser name: ");
         var name = Console.ReadLine();
@@ -46,6 +46,55 @@ public class CreateApiUserTask(AppConfig config) : BaseTask(config)
             Console.WriteLine("Let's try again.");
         }
 
+        CreateApiUser(name, selectedRoles);
+    }
+
+    public override void RunCi(string[] args)
+    {
+        string name, roles;
+
+        if (args.Length == 1)
+        {
+            name = args[0];
+            roles = "";
+        }
+        else if (args.Length != 2)
+        {
+            Console.WriteLine($"Expected exactly two arguments, got {args.Length} instead");
+            return;
+        }
+        else
+        {
+            name = args[0];
+            roles = args[1];
+        }
+
+        var selectedRoles = ParseRoles(roles);
+        if (selectedRoles == null)
+        {
+            Console.WriteLine($"Couldn't parse roles {roles}");
+            return;
+        }
+
+        CreateApiUser(name, selectedRoles);
+    }
+
+    private List<ApiAccessRole> ParseRoles(string roles)
+    {
+        if (string.IsNullOrWhiteSpace(roles))
+        {
+            return new List<ApiAccessRole>();
+        }
+
+        var roleNumbers = roles.Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(int.Parse)
+            .Where(num => num >= 1 && num <= (int)Enum.GetValues<ApiAccessRole>().Max())
+            .ToList();
+        return roleNumbers.Select(n => Enum.GetValues<ApiAccessRole>()[n - 1]).ToList();
+    }
+
+    private void CreateApiUser(string name, IEnumerable<ApiAccessRole> selectedRoles)
+    {
         var user = new ApiUser
         {
             Id = Guid.NewGuid(),

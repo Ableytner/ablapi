@@ -11,7 +11,7 @@ public class DropDbTask(AppConfig config) : BaseTask(config)
 
     public override string Command => "dropdb";
 
-    public override void Run()
+    public override void RunInteractive()
     {
         switch (Config.Database.Type)
         {
@@ -24,6 +24,11 @@ public class DropDbTask(AppConfig config) : BaseTask(config)
             default:
                 throw new InvalidOperationException("Unknown database type");
         }
+    }
+
+    public override void RunCi(string[] _)
+    {
+        Console.WriteLine("Error: dropdb is not allowed in CI mode.");
     }
 
     private void DropSqliteDb()

@@ -8,13 +8,13 @@ public static class ConfigurationBuilderExtensions
     {
         DotEnv.LoadEnvVariables();
 
-        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")?.ToLower();
+        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
         configuration.SetBasePath(Directory.GetCurrentDirectory());
-        configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+        configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
         if (!string.IsNullOrEmpty(environment))
         {
-            configuration.AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true);
+            configuration.AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: false);
         }
         configuration.AddEnvironmentVariables();
         
