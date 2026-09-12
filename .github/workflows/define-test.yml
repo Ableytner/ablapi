@@ -17,11 +17,11 @@ jobs:
         dotnet restore ./Solution/AblApi.slnx
     - name: Unit tests
       run: |
-        dotnet test ./Solution/Tests/Unit.Api/Tests.Unit.Api.csproj --no-restore --verbosity normal -- --output Detailed
+        dotnet test --project ./Solution/Tests/Unit.Api/Tests.Unit.Api.csproj --no-restore --verbosity normal -- --output Detailed
       env:
         GithubConfig__Token: ${{ secrets.GITHUB_TOKEN }}
     - name: Integration tests
       run: |
-        dotnet test ./Solution/Tests/Integration.Api/Tests.Integration.Api.csproj --no-restore --verbosity normal -- --output Detailed
+        dotnet test --project ./Solution/Tests/Integration.Api/Tests.Integration.Api.csproj --no-restore --verbosity normal -- --output Detailed
       env:
         GithubConfig__Token: ${{ secrets.GITHUB_TOKEN }}
