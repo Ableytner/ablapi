@@ -1,4 +1,5 @@
 ﻿using AblApi.Api.Logging;
+using AblApi.Core;
 using AblApi.Core.AppSettings;
 using Serilog;
 
@@ -8,13 +9,9 @@ public static class LoggingBuilderExtension
 {
     public static void ConfigureLogging(this WebApplicationBuilder builder)
     {
-        var environmentIdConfig = new EnvironmentIdAppSettings();
-        builder.Configuration.GetSection(EnvironmentIdAppSettings.SectionName).Bind(environmentIdConfig);
-        builder.Services.AddSingleton(environmentIdConfig);
-
         var elkConfig = new ElkAppSettings();
         builder.Configuration.GetSection(ElkAppSettings.SectionName).Bind(elkConfig);
-        if (!builder.Environment.IsDevelopment() && (string.IsNullOrEmpty(elkConfig.ApiKey) || elkConfig.ApiKey == "APIKEY"))
+        if (!EnvironmentHelper.IsDevelopment() && (string.IsNullOrEmpty(elkConfig.ApiKey) || elkConfig.ApiKey == "APIKEY"))
         {
             //throw new InvalidOperationException("ELK API key is not configured.");
         }
@@ -28,9 +25,9 @@ public static class LoggingBuilderExtension
                 .Enrich.WithMachineName()
                 .Enrich.WithProperty("DOTNET_ENVIRONMENT", context.HostingEnvironment.EnvironmentName);
 
-            configuration.Enrich.With(new EnvironmentEnricher(environmentIdConfig));
+            configuration.Enrich.With(new EnvironmentEnricher());
 
-            if (builder.Environment.IsDevelopment())
+            if (EnvironmentHelper.IsDevelopment())
             {
                 configuration
                     .WriteTo.Console()
@@ -39,8 +36,7 @@ public static class LoggingBuilderExtension
             else
             {
                 configuration
-                    .WriteTo.Console()
-                    .WriteTo.Debug();
+                    .WriteTo.Console();
                 /*configuration
                     .WriteTo.Elasticsearch(elkConfig);*/
             }

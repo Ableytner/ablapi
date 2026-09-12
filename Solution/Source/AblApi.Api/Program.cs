@@ -9,8 +9,6 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        string environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "prod";
-
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Configuration.AddConfigProviders();
@@ -38,7 +36,7 @@ public class Program
         // Unhandled exceptions in Development environment reply with a detailed error json response
         app.UseExceptionHandler();
 
-        if (app.Environment.IsDevelopment())
+        if (EnvironmentHelper.IsDevelopment())
         {
             app.MapOpenApi();
             app.UseSwaggerUI(options =>
@@ -46,17 +44,6 @@ public class Program
                 options.SwaggerEndpoint("/openapi/v1.json", "AblApi v1");
                 options.RoutePrefix = "swagger";
             });
-        }
-
-        if (app.Environment.IsProduction())
-        {
-            var dbConfig = app.Services.GetRequiredService<DatabaseAppSettings>();
-            var migrationHandler = new DbMigrationHandler(dbConfig.Type, dbConfig.Connection);
-
-            if (migrationHandler.NeedsMigration())
-            {
-                migrationHandler.Migrate();
-            }
         }
 
         // TODO: HTTPS communication with reverse proxy

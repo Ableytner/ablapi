@@ -1,10 +1,10 @@
-﻿using AblApi.Common.Enums;
+﻿using AblApi.Core;
 using AblApi.Core.AppSettings;
+using AblApi.DataAccess;
 using AblApi.DataAccess.Context;
 using AblApi.DataAccess.Extensions;
 using AblApi.Repositories;
 using AblApi.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace AblApi.Api.Startup;
 
@@ -25,6 +25,16 @@ public static class DatabaseServiceCollectionExtensions
         {
             options.ConfigureDatabase(dbConfig.Type, dbConfig.Connection);
         });
+
+        if (!EnvironmentHelper.IsDevelopment())
+        {
+            var migrationHandler = new DbMigrationHandler(dbConfig.Type, dbConfig.Connection);
+
+            if (migrationHandler.NeedsMigration())
+            {
+                migrationHandler.Migrate();
+            }
+        }
 
         return services;
     }

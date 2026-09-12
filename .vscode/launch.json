@@ -65,7 +65,10 @@
             "args": [],
             "cwd": "${workspaceFolder}/Solution/Tools/AblApi.SqlTool",
             "stopAtEntry": false,
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
         }
     ]
 }
