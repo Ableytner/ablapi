@@ -1,3 +1,4 @@
+using AblApi.Common.Utilities;
 using AblApi.Common.Enums;
 using AblApi.DataAccess.Context;
 using AblApi.DataAccess.Extensions;
@@ -95,11 +96,12 @@ public class CreateApiUserTask(AppConfig config) : BaseTask(config)
 
     private void CreateApiUser(string name, IEnumerable<ApiAccessRole> selectedRoles)
     {
+        var plainToken = GenerateToken();
         var user = new ApiUser
         {
             Id = Guid.NewGuid(),
             Name = name,
-            Token = GenerateToken()
+            Token = PasswordHasher.Hash(plainToken)
         };
         var grantedAt = DateTime.UtcNow;
         foreach (var role in selectedRoles)
@@ -122,7 +124,7 @@ public class CreateApiUserTask(AppConfig config) : BaseTask(config)
             Console.WriteLine();
             Console.WriteLine($"Created ApiUser {user.Name} with roles: {string.Join(", ", selectedRoles)}");
             Console.WriteLine($"Id: {user.Id}");
-            Console.WriteLine($"Token: {user.Token}");
+            Console.WriteLine($"Token: {plainToken}");
         }
         catch (Exception ex)
         {

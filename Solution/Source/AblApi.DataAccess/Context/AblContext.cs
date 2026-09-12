@@ -23,7 +23,7 @@ public class AblContext(DbContextOptions<AblContext> options) : DbContext(option
             entity.Property(e => e.Id).ValueGeneratedNever();
 
             entity.Property(e => e.Name).HasMaxLength(64);
-            entity.Property(e => e.Token).HasMaxLength(64);
+            entity.Property(e => e.Token).HasMaxLength(128);
         });
 
         modelBuilder.Entity<ApiAccessRoleGrant>(entity =>

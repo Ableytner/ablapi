@@ -1,3 +1,4 @@
+using AblApi.Common.Utilities;
 using AblApi.Common.Enums;
 using AblApi.Core.AppJwtToken;
 using AblApi.DataAccess.Models;
@@ -217,7 +218,7 @@ public class HelloWorldControllerTests : RealAuthTestBase
         {
             Id = Guid.NewGuid(),
             Name = "Test User",
-            Token = Guid.NewGuid().ToString()
+            Token = PasswordHasher.Hash(Guid.NewGuid().ToString())
         };
 
         TestHelpers.AblContext.ApiUsers.Add(user);

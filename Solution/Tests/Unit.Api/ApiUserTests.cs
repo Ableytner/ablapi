@@ -1,4 +1,5 @@
-﻿using AblApi.Common.Enums;
+﻿using AblApi.Common.Utilities;
+using AblApi.Common.Enums;
 using AblApi.Common.Extensions;
 using AblApi.DataAccess.Models;
 using AblApi.Repositories.Interfaces;
@@ -10,20 +11,20 @@ namespace Tests.Unit.Api;
 public class ApiUserTests(InMemorySqliteDbFixture fixture) : IClassFixture<InMemorySqliteDbFixture>
 {
     private readonly InMemorySqliteDbFixture _fixture = fixture;
-    private readonly IAblRepository _ablRepository = fixture.ServiceProvider.GetService<IAblRepository>();
+    private readonly IAblRepository _ablRepository = fixture.ServiceProvider.GetRequiredService<IAblRepository>();
 
     [Fact]
     public async Task ApiUserRepository_Upsert_PersistsChanges()
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var userToken = Guid.NewGuid().ToString();
+        var userTokenHashed = PasswordHasher.Hash(Guid.NewGuid().ToString());
         _fixture.AblContext.Add(
             new ApiUser
             {
                 Id = userId,
                 Name = "Test User",
-                Token = userToken,
+                Token = userTokenHashed,
                 Roles = [
                     new ApiAccessRoleGrant { Role = ApiAccessRole.Admin, GrantedAt = DateTime.UtcNow },
                     new ApiAccessRoleGrant { Role = ApiAccessRole.Log, GrantedAt = DateTime.UtcNow }
@@ -34,7 +35,7 @@ public class ApiUserTests(InMemorySqliteDbFixture fixture) : IClassFixture<InMem
         {
             Id = userId,
             Name = "Updated User",
-            Token = userToken,
+            Token = userTokenHashed,
             Roles = [
                 new ApiAccessRoleGrant { Role = ApiAccessRole.Log, GrantedAt = DateTime.UtcNow }
             ]

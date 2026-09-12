@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http.Headers;
 using System.Text;
+using AblApi.Common.Utilities;
 using AblApi.Core.AppJwtToken;
 using AblApi.Core.AppJwtToken.Dtos;
 using AblApi.Repositories.Interfaces;
@@ -39,7 +40,7 @@ public class AuthController(ILogger<AuthController> logger, IAblRepository ablRe
                 _logger.LogWarning("AuthController.Authenticate: User with ID {UserId} not found", userId);
                 return Forbid();
             }
-            if (user.Token != token)
+            if (!PasswordHasher.Verify(token, user.Token))
             {
                 _logger.LogWarning("AuthController.Authenticate: Invalid token for user {UserId}", userId);
                 return Forbid();

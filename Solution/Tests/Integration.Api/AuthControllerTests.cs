@@ -1,3 +1,4 @@
+using AblApi.Common.Utilities;
 using AblApi.Common.Enums;
 using AblApi.Core.AppJwtToken.Dtos;
 using AblApi.DataAccess.Models;
@@ -23,7 +24,7 @@ public class AuthControllerTests : TestBase
         {
             Id = userId,
             Name = "TestUser",
-            Token = userToken,
+            Token = PasswordHasher.Hash(userToken),
             Roles = new List<ApiAccessRoleGrant>()
         };
         TestHelpers.AblContext.ApiUsers.Add(testUser);
@@ -78,13 +79,12 @@ public class AuthControllerTests : TestBase
     public async Task Authenticate_WithUserWithoutRoles_ReturnsJwtToken()
     {
         // Arrange
-        var userId = Guid.NewGuid();
         var userToken = Guid.NewGuid().ToString();
         var testUser = new ApiUser
         {
-            Id = userId,
+            Id = Guid.NewGuid(),
             Name = "TestUserNoRoles",
-            Token = userToken,
+            Token = PasswordHasher.Hash(userToken),
             Roles = new List<ApiAccessRoleGrant>()
         };
         TestHelpers.AblContext.ApiUsers.Add(testUser);
@@ -131,13 +131,11 @@ public class AuthControllerTests : TestBase
     public async Task Authenticate_WithWrongToken_ReturnsForbid(string wrongToken)
     {
         // Arrange
-        var userId = Guid.NewGuid();
-        var userToken = Guid.NewGuid().ToString();
         var testUser = new ApiUser
         {
-            Id = userId,
+            Id = Guid.NewGuid(),
             Name = "TestUserWrongToken",
-            Token = userToken,
+            Token = PasswordHasher.Hash(Guid.NewGuid().ToString()),
             Roles = new List<ApiAccessRoleGrant>()
         };
         TestHelpers.AblContext.ApiUsers.Add(testUser);
