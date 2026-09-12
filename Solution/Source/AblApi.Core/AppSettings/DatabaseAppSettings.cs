@@ -18,6 +18,10 @@ public class DatabaseAppSettings
             {
                 return _connection.Replace("~", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
             }
+            if (Type == DatabaseType.Postgres && !string.IsNullOrEmpty(_connection))
+            {
+                return _connection.Replace("postgresql://", "postgres://");
+            }
 
             return _connection;
         }
