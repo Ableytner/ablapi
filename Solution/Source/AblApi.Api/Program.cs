@@ -1,7 +1,6 @@
 using AblApi.Api.ExceptionHandling;
 using AblApi.Api.Startup;
-using AblApi.Core.AppSettings;
-using AblApi.DataAccess;
+using AblApi.Core;
 
 namespace AblApi.Api;
 
@@ -31,6 +30,8 @@ public class Program
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
             });
 
+        builder.Services.AddRateLimiting();
+
         var app = builder.Build();
 
         // Unhandled exceptions in Development environment reply with a detailed error json response
@@ -50,6 +51,8 @@ public class Program
         // app.UseHttpsRedirection();
 
         app.UseCors();
+
+        app.UseRateLimiter();
 
         app.UseAuthentication();
         app.UseAuthorization();

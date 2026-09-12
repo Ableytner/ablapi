@@ -26,7 +26,7 @@ public static class DatabaseServiceCollectionExtensions
             options.ConfigureDatabase(dbConfig.Type, dbConfig.Connection);
         });
 
-        if (!EnvironmentHelper.IsDevelopment())
+        if (EnvironmentHelper.IsProduction())
         {
             var migrationHandler = new DbMigrationHandler(dbConfig.Type, dbConfig.Connection);
 

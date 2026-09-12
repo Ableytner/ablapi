@@ -1,4 +1,5 @@
 using AblApi.Api.Startup;
+using AblApi.Core;
 using AblApi.Core.AppGithub;
 using AblApi.Core.AppJwtToken;
 using AblApi.DataAccess.Context;
@@ -22,6 +23,8 @@ public abstract class BaseFixture
 
     protected BaseFixture(AblContext ablContext)
     {
+        EnvironmentHelper.SetEnvironment("Development");
+
         AblContext = ablContext;
 
         Log.Logger = new LoggerConfiguration()

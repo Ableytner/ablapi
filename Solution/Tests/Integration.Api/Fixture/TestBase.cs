@@ -1,3 +1,4 @@
+using AblApi.Core;
 using Tests.Common.Mocks;
 
 namespace Integration.Api.Fixture;
@@ -13,6 +14,8 @@ public abstract class TestBase : IAsyncLifetime
 
     protected TestBase()
     {
+        EnvironmentHelper.SetEnvironment("Development");
+
         string databaseName = $"TestBaseDb_{Guid.NewGuid():N}";
 
         _sharedFactory = CreateTestApiFactory(databaseName);

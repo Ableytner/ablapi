@@ -14,7 +14,9 @@ public static class EnvironmentHelper
 
     public static bool IsProduction()
     {
-        return GetEnvironment().StartsWith("prod", StringComparison.CurrentCultureIgnoreCase);
+        return GetEnvironment().StartsWith("prod", StringComparison.CurrentCultureIgnoreCase)
+               || GetEnvironment().StartsWith("test", StringComparison.CurrentCultureIgnoreCase)
+               || GetEnvironment().StartsWith("stage", StringComparison.CurrentCultureIgnoreCase);
     }
 
     public static string GetEnvironment()
@@ -29,5 +31,10 @@ public static class EnvironmentHelper
         }
 
         return _environment;
+    }
+
+    public static void SetEnvironment(string environment)
+    {
+        _environment = environment;
     }
 }
