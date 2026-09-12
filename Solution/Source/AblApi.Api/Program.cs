@@ -1,5 +1,7 @@
 using AblApi.Api.ExceptionHandling;
 using AblApi.Api.Startup;
+using AblApi.Core.AppSettings;
+using AblApi.DataAccess;
 
 namespace AblApi.Api;
 
@@ -44,6 +46,17 @@ public class Program
                 options.SwaggerEndpoint("/openapi/v1.json", "AblApi v1");
                 options.RoutePrefix = "swagger";
             });
+        }
+
+        if (app.Environment.IsProduction())
+        {
+            var dbConfig = app.Services.GetRequiredService<DatabaseAppSettings>();
+            var migrationHandler = new DbMigrationHandler(dbConfig.Type, dbConfig.Connection);
+
+            if (migrationHandler.NeedsMigration())
+            {
+                migrationHandler.Migrate();
+            }
         }
 
         // TODO: HTTPS communication with reverse proxy
