@@ -10,7 +10,7 @@ namespace Integration.Api;
 
 public class HelloWorldControllerTests : RealAuthTestBase
 {
-    private const string BaseUrl = "api/hello-world";
+    private const string BaseUrl = "hello-world";
 
     private readonly IJwtTokenService _jwtTokenService;
 

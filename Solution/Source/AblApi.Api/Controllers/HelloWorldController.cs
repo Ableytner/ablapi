@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AblApi.Api.Controllers;
 
-[Route("api/hello-world/")]
+[Route("hello-world/")]
 [ApiController]
 public class HelloWorldController : ControllerBase
 {

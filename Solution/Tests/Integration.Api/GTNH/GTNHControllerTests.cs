@@ -7,7 +7,7 @@ namespace Integration.Api.GTNH;
 
 public class GTNHControllerTests : GTNHTestBase
 {
-    private const string BaseUrl = "api/gtnh";
+    private const string BaseUrl = "gtnh";
 
     private static readonly MockHttpServer StableVersionServer = new(GetVersionsJson());
 

@@ -14,8 +14,8 @@ namespace Integration.Api;
 /// </summary>
 public class JwtAuthenticationMiddlewareTests : RealAuthTestBase
 {
-    private const string RegisteredEndpoint = "api/hello-world/private/";
-    private const string AdminEndpoint = "api/hello-world/admin/";
+    private const string RegisteredEndpoint = "hello-world/private/";
+    private const string AdminEndpoint = "hello-world/admin/";
 
     private readonly JwtAppSettings _jwtSettings;
     private readonly IJwtTokenService _jwtTokenService;

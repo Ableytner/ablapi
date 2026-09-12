@@ -7,7 +7,7 @@ USER_TOKEN = "mytoken"
 def get_jwt_token(base_url: str, user_id: str, user_token: str) -> str:
 	"""Request a new JWT token for the given user ID."""
 
-	url = f"{base_url}/api/Auth/"
+	url = f"{base_url}/Auth/"
 	response = requests.post(url, auth=(user_id, user_token), verify=False)
 	response.raise_for_status()
 
@@ -19,7 +19,7 @@ def get_jwt_token(base_url: str, user_id: str, user_token: str) -> str:
 def call_hello_world_private(base_url: str, token: str) -> str:
 	"""Call the authenticated Hello World endpoint using the JWT token."""
 
-	url = f"{base_url}/api/hello-world/log/"
+	url = f"{base_url}/hello-world/log/"
 	headers = {"Authorization": f"Bearer {token}"}
 	response = requests.get(url, headers=headers, verify=False)
 	response.raise_for_status()

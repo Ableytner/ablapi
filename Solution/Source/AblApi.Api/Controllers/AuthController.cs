@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AblApi.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
 public class AuthController(ILogger<AuthController> logger, IAblRepository ablRepository, IJwtTokenService jwtTokenService) : ControllerBase
 {

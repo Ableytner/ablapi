@@ -11,7 +11,7 @@ namespace Integration.Api;
 
 public class AuthControllerTests : TestBase
 {
-    private const string BaseUrl = "api/auth";
+    private const string BaseUrl = "auth";
 
     [Fact]
     public async Task Authenticate_WithValidUser_ReturnsJwtToken()

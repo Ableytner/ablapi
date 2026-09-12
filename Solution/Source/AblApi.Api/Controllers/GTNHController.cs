@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AblApi.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
 public class GTNHController(ILogger<GTNHController> logger, IGTNHService gtnhManager) : ControllerBase
 {
