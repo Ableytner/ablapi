@@ -16,7 +16,7 @@ public static class LoggingBuilderExtension
         builder.Configuration.GetSection(ElkAppSettings.SectionName).Bind(elkConfig);
         if (!builder.Environment.IsDevelopment() && (string.IsNullOrEmpty(elkConfig.ApiKey) || elkConfig.ApiKey == "APIKEY"))
         {
-            throw new InvalidOperationException("ELK API key is not configured.");
+            //throw new InvalidOperationException("ELK API key is not configured.");
         }
         builder.Services.AddSingleton(elkConfig);
 
@@ -39,7 +39,10 @@ public static class LoggingBuilderExtension
             else
             {
                 configuration
-                    .WriteTo.Elasticsearch(elkConfig);
+                    .WriteTo.Console()
+                    .WriteTo.Debug();
+                /*configuration
+                    .WriteTo.Elasticsearch(elkConfig);*/
             }
         });
     }
