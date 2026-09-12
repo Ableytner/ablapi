@@ -2,9 +2,7 @@ services:
   api:
     container_name: ablapi
     hostname: ablapi
-    build:
-      context: ./Solution
-#    image: ghcr.io/ableytner/ablapi:dev
+    image: ghcr.io/ableytner/ablapi:dev
     ports:
       - 9219:8000
     environment:
