@@ -1,0 +1,19 @@
+﻿using AblApi.Common.Attributes;
+using AblApi.Common.Enums;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AblApi.Api.Controllers;
+
+[Route("[controller]/")]
+[ApiController]
+public class StatusController : ControllerBase
+{
+    [HttpGet]
+    [AccessLevel(AccessLevelType.PublicInternetAccess)]
+    [EndpointSummary("Get the API health status")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    public async Task<ActionResult<string>> Index()
+    {
+        return Ok("OK");
+    }
+}

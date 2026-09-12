@@ -1,12 +1,6 @@
-*\__pycache__
-*\.pytest_cache
-*\.mypy_cache
-*\.ruff_cache
-*\.vscode
-*\requests-cache
-*\venv*
-*\test_run
-*.pyc
+*/.vscode
+!.vscode/launch.json
+!.vscode/tasks.json
+*/.vs
 *.log
-*.egg-info
 .env

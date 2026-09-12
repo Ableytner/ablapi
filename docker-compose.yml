@@ -2,12 +2,12 @@ services:
   api:
     container_name: ablapi
     hostname: ablapi
-    build:
-      context: .
-#    image: ghcr.io/ableytner/ablapi:dev
+    image: ghcr.io/ableytner/ablapi:dev
     ports:
       - 9219:8000
     environment:
-      MODULES: "gtnh,hello_world"
-      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      ElkConfig__ApiKey: "${ELK_API_KEY}"
+      Database__Connection: "${DB_CONNECTION_STRING}"
+      JwtConfig__Key: "${JWT_KEY}"
+      GithubConfig__Token: "${GITHUB_TOKEN}"
     restart: unless-stopped
