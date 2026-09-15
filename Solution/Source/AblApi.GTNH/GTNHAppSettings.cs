@@ -13,4 +13,6 @@ public class GTNHAppSettings
     public string DailyBuildsRepoName { get; set; }
 
 	public string DailyBuildsWorkflowId { get; set; }
+
+	public int CacheExpirationMinutes { get; set; }
 }

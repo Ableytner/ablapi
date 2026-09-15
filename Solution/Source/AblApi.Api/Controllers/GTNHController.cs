@@ -3,15 +3,18 @@ using AblApi.Common.Enums;
 using AblApi.GTNH;
 using AblApi.GTNH.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AblApi.Api.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class GTNHController(ILogger<GTNHController> logger, IGTNHService gtnhManager) : ControllerBase
+public class GTNHController(IGTNHService gtnhManager, IMemoryCache cache, GTNHAppSettings gtnhAppSettings) : ControllerBase
 {
-    private readonly ILogger<GTNHController> _logger = logger;
     private readonly IGTNHService _gtnhManager = gtnhManager;
+    private readonly IMemoryCache _cache = cache;
+    private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(gtnhAppSettings.CacheExpirationMinutes);
+    private readonly bool _isCachingEnabled = gtnhAppSettings.CacheExpirationMinutes > 0;
 
     [HttpGet("daily/latest")]
     [AccessLevel(AccessLevelType.PublicInternetAccess)]
@@ -20,11 +23,23 @@ public class GTNHController(ILogger<GTNHController> logger, IGTNHService gtnhMan
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DailyVersionDto>> GetLatestDailyVersion([FromQuery] bool? success = null)
     {
+        var cacheKey = $"gtnh:daily:latest:{success}";
+
+        if (_isCachingEnabled && _cache.TryGetValue(cacheKey, out DailyVersionDto? cachedDto))
+        {
+            return Ok(cachedDto);
+        }
+
         var dailyVersion = await _gtnhManager.GetLatestDailyVersionAsync(success);
 
         if (dailyVersion == null)
         {
             return NotFound();
+        }
+
+        if (_isCachingEnabled)
+        {
+            _cache.Set(cacheKey, dailyVersion, new MemoryCacheEntryOptions { SlidingExpiration = _cacheExpiration });
         }
         return Ok(dailyVersion);
     }
@@ -52,11 +67,23 @@ public class GTNHController(ILogger<GTNHController> logger, IGTNHService gtnhMan
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StableVersionDto>> GetLatestStableVersion()
     {
+        var cacheKey = "gtnh:stable:latest";
+
+        if (_isCachingEnabled && _cache.TryGetValue(cacheKey, out StableVersionDto? cachedDto))
+        {
+            return Ok(cachedDto);
+        }
+
         var stableVersion = await _gtnhManager.GetLatestStableVersionAsync();
 
         if (stableVersion == null)
         {
             return NotFound();
+        }
+
+        if (_isCachingEnabled)
+        {
+            _cache.Set(cacheKey, stableVersion, new MemoryCacheEntryOptions { SlidingExpiration = _cacheExpiration });
         }
         return Ok(stableVersion);
     }

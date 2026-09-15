@@ -1,11 +1,12 @@
 ﻿using AblApi.Common.Jobs;
 using AblApi.Repositories.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AblApi.GTNH;
 
-public class GTNHBackgroundService(ILogger<GTNHBackgroundService> logger, IServiceScopeFactory scopeFactory, GTNHAppSettings gtnhConfiguration) : CyclicBackgroundService(logger)
+public class GTNHBackgroundService(ILogger<GTNHBackgroundService> logger, IServiceScopeFactory scopeFactory, GTNHAppSettings gtnhConfiguration, IMemoryCache cache) : CyclicBackgroundService(logger)
 {
     protected override string Name => nameof(GTNHBackgroundService);
     protected override TimeSpan CycleTime => _fetchCycle;
@@ -13,6 +14,7 @@ public class GTNHBackgroundService(ILogger<GTNHBackgroundService> logger, IServi
     private readonly ILogger<GTNHBackgroundService> _logger = logger;
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     private readonly TimeSpan _fetchCycle = TimeSpan.FromSeconds(gtnhConfiguration.FetchCycleInSeconds);
+    private readonly IMemoryCache _cache = cache;
 
     protected override async Task Initialize()
     {
@@ -45,6 +47,12 @@ public class GTNHBackgroundService(ILogger<GTNHBackgroundService> logger, IServi
             ablRepository.GTNHDailyVersionRepository.Add(dailyVersion.ToDbo());
 
             await ablRepository.SaveChangesAsync();
+
+            // drop old cache after new latest version was added
+            _cache.Remove("gtnh:daily:latest");
+            _cache.Remove("gtnh:daily:latest:true");
+            _cache.Remove("gtnh:daily:latest:false");
+
             _logger.LogInformation("Saved new GTNH daily version {dailyVersion}", dailyVersion.RunNumber);
         }
     }

@@ -25,6 +25,7 @@ internal static class AppServiceCollectionExtensions
         services.AddTransient<IGTNHService, GTNHService>();
         services.AddHostedService<GTNHBackgroundService>();
 
+        services.AddMemoryCache();
         services.AddLocalization();
 
         return services;
