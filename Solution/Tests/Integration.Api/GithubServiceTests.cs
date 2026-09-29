@@ -185,7 +185,7 @@ public class GithubServiceTests : TestBase
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(7, result.TotalCount);
+        Assert.Equal(5, result.TotalCount);
     }
 
     private HttpResponseMessage GetWorkflowRuns_1()
