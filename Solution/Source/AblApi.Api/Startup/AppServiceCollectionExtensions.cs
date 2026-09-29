@@ -1,4 +1,5 @@
 using AblApi.Core.AppGithub;
+using AblApi.Core.AppNikoBot;
 using AblApi.GTNH;
 
 namespace AblApi.Api.Startup;
@@ -19,10 +20,19 @@ internal static class AppServiceCollectionExtensions
         config.GetSection(GTNHAppSettings.SectionName).Bind(gtnhConfig);
         services.AddSingleton(gtnhConfig);
 
+        var nikobotConfig = new NikoBotAppSettings();
+        config.GetSection(NikoBotAppSettings.SectionName).Bind(nikobotConfig);
+        if (string.IsNullOrEmpty(nikobotConfig.BaseUrl) || string.IsNullOrEmpty(nikobotConfig.ApiSecret))
+        {
+            throw new InvalidOperationException("NikoBot baseurl is not configured.");
+        }
+        services.AddSingleton(nikobotConfig);
+
         services.AddSingleton<IGithubHttpClient, GithubHttpClient>();
         services.AddTransient<IGithubService, GithubService>();
         services.AddTransient<IGTNewHorizonsService, GTNewHorizonsService>();
         services.AddTransient<IGTNHService, GTNHService>();
+        services.AddTransient<INikoBotService, NikoBotService>();
         services.AddHostedService<GTNHBackgroundService>();
 
         services.AddMemoryCache();

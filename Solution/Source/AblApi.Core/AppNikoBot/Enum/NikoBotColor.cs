@@ -1,0 +1,66 @@
+namespace AblApi.Core.AppNikoBot.Enum;
+
+public enum NikoBotColor
+{
+    Default,
+    Red,
+    Green,
+    Blue,
+    Yellow,
+    Orange,
+    Purple,
+    Magenta,
+    Teal,
+    DarkRed,
+    DarkGreen,
+    DarkBlue,
+    DarkPurple,
+    DarkMagenta,
+    DarkOrange,
+    DarkGold,
+    DarkTeal,
+    DarkGray,
+    DarkenGray,
+    LightGray,
+    LighterGray,
+    DarkerGray,
+    Blurple,
+    Pink,
+    Fuchsia,
+    BrandRed,
+    BrandGreen,
+}
+
+public static class NikoBotColorExtensions
+{
+    public static string GetHexValue(this NikoBotColor color) => color switch
+    {
+        NikoBotColor.Red => "e74c3c",
+        NikoBotColor.Green => "57f287",
+        NikoBotColor.Blue => "3498db",
+        NikoBotColor.Yellow => "fee75c",
+        NikoBotColor.Orange => "f26522",
+        NikoBotColor.Purple => "9b59b6",
+        NikoBotColor.Magenta => "eb459e",
+        NikoBotColor.Teal => "1abc9c",
+        NikoBotColor.DarkRed => "792d30",
+        NikoBotColor.DarkGreen => "21854a",
+        NikoBotColor.DarkBlue => "206694",
+        NikoBotColor.DarkPurple => "6a3298",
+        NikoBotColor.DarkMagenta => "9146eb",
+        NikoBotColor.DarkOrange => "ed8204",
+        NikoBotColor.DarkGold => "ff862f",
+        NikoBotColor.DarkTeal => "11806a",
+        NikoBotColor.DarkGray => "606d75",
+        NikoBotColor.DarkenGray => "2d3134",
+        NikoBotColor.LightGray => "95a5a6",
+        NikoBotColor.LighterGray => "b9bbbe",
+        NikoBotColor.DarkerGray => "34373c",
+        NikoBotColor.Blurple => "3498db",
+        NikoBotColor.Pink => "eb459e",
+        NikoBotColor.Fuchsia => "eb459e",
+        NikoBotColor.BrandRed => "e74c3c",
+        NikoBotColor.BrandGreen => "57f287",
+        _ => "99aab5",
+    };
+}
