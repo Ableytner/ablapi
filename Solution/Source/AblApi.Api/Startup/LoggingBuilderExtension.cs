@@ -30,7 +30,6 @@ public static class LoggingBuilderExtension
             if (EnvironmentHelper.IsDevelopment())
             {
                 configuration
-                    .WriteTo.Console()
                     .WriteTo.Debug();
             }
             else
