@@ -35,7 +35,7 @@ public class WillhabenListing
 
     public double? DistanceKm { get; set; }
 
-    public static WillhabenListing FromDto(WillhabenListingDto dto, WillhabenAppSettings settings)
+    public static WillhabenListing FromDto(WillhabenListingDto dto, WillhabenConfigDto config)
     {
         var listing = new WillhabenListing
         {
@@ -53,7 +53,7 @@ public class WillhabenListing
             Zustand = TreeAttributes.ParseValue(dto.GetAttr("CATEGORYTREEATTRIBUTEIDS"), "Zustand"),
             Übergabe = TreeAttributes.ParseValue(dto.GetAttr("CATEGORYTREEATTRIBUTEIDS"), "Übergabe"),
             Km = dto.ExtractKm(),
-            DistanceKm = dto.ExtractDistance(settings),
+            DistanceKm = dto.ExtractDistance(config),
         };
 
         return listing;

@@ -72,7 +72,7 @@ public static class WillhabenListingDtoExt
         return null;
     }
 
-    public static double? ExtractDistance(this WillhabenListingDto dto, WillhabenAppSettings settings)
+    public static double? ExtractDistance(this WillhabenListingDto dto, WillhabenConfigDto config)
     {
         var coordinates = dto.GetAttr("COORDINATES");
         if (coordinates != null)
@@ -84,7 +84,7 @@ public static class WillhabenListingDtoExt
                 !double.IsNaN(lat) &&
                 !double.IsNaN(lon))
             {
-                return CalculateDistance(settings.ReferenceLat, settings.ReferenceLon, lat, lon);
+                return CalculateDistance(config.ReferenceLat, config.ReferenceLon, lat, lon);
             }
         }
 

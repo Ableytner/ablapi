@@ -9,38 +9,34 @@ namespace AblApi.Core.AppWillhaben;
 
 public class WillhabenHttpClient : CachedHttpClient, IWillhabenHttpClient
 {
-    private readonly WillhabenAppSettings _settings;
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
     };
 
-    public WillhabenHttpClient(WillhabenAppSettings settings)
+    public WillhabenHttpClient()
     {
-        _settings = settings;
-
         BaseAddress = new Uri("https://www.willhaben.at");
         DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         DefaultRequestHeaders.AcceptCharset.Add(new StringWithQualityHeaderValue(Encoding.UTF8.WebName));
         DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AblApi", "1.0"));
     }
 
-    public virtual string BuildSearchUrl()
+    public virtual string BuildSearchUrl(WillhabenConfigDto config)
     {
-        var baseUrl = "https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz/-" + _settings.Category;
+        var baseUrl = "https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz/-" + config.Category;
 
         var builder = new UrlBuilder()
             .WithUrl(baseUrl)
-            .WithParam("rows", _settings.Rows.ToString())
-            .WithOptionalParam(!string.IsNullOrEmpty(_settings.Keyword), "keyword", _settings.Keyword)
-            .WithOptionalParam(_settings.PriceMin > 0, "PRICE_FROM", _settings.PriceMin.ToString())
-            .WithOptionalParam(_settings.PriceMax > 0 && _settings.PriceMax < 1_000_000_000, "PRICE_TO", _settings.PriceMax.ToString())
-            .WithOptionalParam(_settings.FilterPaylivery, "paylivery", "true");
+            .WithParam("rows", config.Rows.ToString())
+            .WithOptionalParam(!string.IsNullOrEmpty(config.Keyword), "keyword", config.Keyword)
+            .WithOptionalParam(config.PriceMin > 0, "PRICE_FROM", config.PriceMin.ToString())
+            .WithOptionalParam(config.PriceMax > 0 && config.PriceMax < 1_000_000_000, "PRICE_TO", config.PriceMax.ToString())
+            .WithOptionalParam(config.FilterPaylivery, "paylivery", "true");
 
-        if (_settings.HandoverTypes.Count > 0)
+        if (config.HandoverTypes.Count > 0)
         {
-            builder.WithParam("treeAttributes", _settings.HandoverTypes.Select(TreeAttributes.ParseNames));
+            builder.WithParam("treeAttributes", config.HandoverTypes.Select(TreeAttributes.ParseNames));
         }
 
         return builder.Build();

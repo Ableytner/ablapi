@@ -1,5 +1,6 @@
 using System.Text.Json;
 using AblApi.Core.AppWillhaben;
+using AblApi.Core.AppWillhaben.Dtos;
 using AblApi.Core.AppWillhaben.Extensions;
 
 namespace Integration.Api;
@@ -11,16 +12,16 @@ public class WillhabenIntegrationLiveTests
     public async Task GetListingsAsync_ParsesRealHtmlAndJson()
     {
         // Arrange
-        var settings = new WillhabenAppSettings
+        var config = new WillhabenConfigDto
         {
             Category = 5882,
             Rows = 5,
         };
 
-        var httpClient = new WillhabenHttpClient(settings);
+        var httpClient = new WillhabenHttpClient();
 
         // Act
-        var searchUrl = httpClient.BuildSearchUrl();
+        var searchUrl = httpClient.BuildSearchUrl(config);
         var dtos = await httpClient.GetListingsAsync(searchUrl, TestContext.Current.CancellationToken);
 
         // Assert
@@ -55,16 +56,16 @@ public class WillhabenIntegrationLiveTests
     public async Task GetListingsAsync_RawJsonOutput()
     {
         // Arrange
-        var settings = new WillhabenAppSettings
+        var config = new WillhabenConfigDto
         {
             Category = 5882,
             Rows = 3,
         };
 
-        var httpClient = new WillhabenHttpClient(settings);
+        var httpClient = new WillhabenHttpClient();
 
         // Act
-        var searchUrl = httpClient.BuildSearchUrl();
+        var searchUrl = httpClient.BuildSearchUrl(config);
         var response = await httpClient.GetAsync(searchUrl, TestContext.Current.CancellationToken);
         var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 

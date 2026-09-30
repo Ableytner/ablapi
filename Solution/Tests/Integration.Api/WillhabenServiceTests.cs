@@ -1,6 +1,6 @@
-using AblApi.Core.AppSettings;
 using AblApi.Core.AppWillhaben;
 using AblApi.Core.AppWillhaben.Dtos;
+using AblApi.Core.AppWillhaben.Extensions;
 using Integration.Api.Fixture;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,13 +11,13 @@ namespace Integration.Api;
 public class WillhabenServiceTests : TestBase
 {
     private readonly ILogger<WillhabenService> _logger;
-    private readonly WillhabenAppSettings _config;
+    private readonly WillhabenConfigDto _config;
 
     public WillhabenServiceTests()
     {
         _logger = Substitute.For<ILogger<WillhabenService>>();
 
-        _config = new WillhabenAppSettings
+        _config = new WillhabenConfigDto
         {
             Keyword = "test gpu",
             Category = 5882,
@@ -40,10 +40,10 @@ public class WillhabenServiceTests : TestBase
     {
         // Arrange
         var mockHttpClient = CreateMockHttpClient();
-        var service = new WillhabenService(_logger, _config, mockHttpClient);
+        var service = new WillhabenService(_logger, mockHttpClient);
 
         // Act
-        var result = await service.SearchAsync(TestContext.Current.CancellationToken);
+        var result = await service.SearchAsync(_config, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -55,7 +55,7 @@ public class WillhabenServiceTests : TestBase
     {
         // Arrange
         var mockHttpClient = CreateMockHttpClient();
-        var config = new WillhabenAppSettings
+        var config = new WillhabenConfigDto
         {
             Keyword = "test",
             Category = 5882,
@@ -63,10 +63,10 @@ public class WillhabenServiceTests : TestBase
             PriceMin = 200,
             PriceMax = 300,
         };
-        var service = new WillhabenService(_logger, config, mockHttpClient);
+        var service = new WillhabenService(_logger, mockHttpClient);
 
         // Act
-        var result = await service.SearchAsync(TestContext.Current.CancellationToken);
+        var result = await service.SearchAsync(config, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.All(result, listing =>
@@ -82,7 +82,7 @@ public class WillhabenServiceTests : TestBase
     {
         // Arrange
         var mockHttpClient = CreateMockHttpClient();
-        var config = new WillhabenAppSettings
+        var config = new WillhabenConfigDto
         {
             Keyword = "test",
             Category = 5882,
@@ -90,10 +90,10 @@ public class WillhabenServiceTests : TestBase
             MustInclude = ["rtx"],
             MustExclude = ["gtx"],
         };
-        var service = new WillhabenService(_logger, config, mockHttpClient);
+        var service = new WillhabenService(_logger, mockHttpClient);
 
         // Act
-        var result = await service.SearchAsync(TestContext.Current.CancellationToken);
+        var result = await service.SearchAsync(config, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.All(result, listing =>
@@ -109,17 +109,17 @@ public class WillhabenServiceTests : TestBase
     {
         // Arrange
         var mockHttpClient = CreateMockHttpClient();
-        var config = new WillhabenAppSettings
+        var config = new WillhabenConfigDto
         {
             Keyword = "test",
             Category = 5882,
             Rows = 100,
             AllowedStates = ["Wien"],
         };
-        var service = new WillhabenService(_logger, config, mockHttpClient);
+        var service = new WillhabenService(_logger, mockHttpClient);
 
         // Act
-        var result = await service.SearchAsync(TestContext.Current.CancellationToken);
+        var result = await service.SearchAsync(config, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.All(result, listing =>
@@ -133,7 +133,7 @@ public class WillhabenServiceTests : TestBase
     {
         // Arrange
         var mockHttpClient = CreateMockHttpClient();
-        var config = new WillhabenAppSettings
+        var config = new WillhabenConfigDto
         {
             Keyword = "test",
             Category = 5882,
@@ -142,10 +142,10 @@ public class WillhabenServiceTests : TestBase
             ReferenceLat = 48.2082,
             ReferenceLon = 16.3738,
         };
-        var service = new WillhabenService(_logger, config, mockHttpClient);
+        var service = new WillhabenService(_logger, mockHttpClient);
 
         // Act
-        var result = await service.SearchAsync(TestContext.Current.CancellationToken);
+        var result = await service.SearchAsync(config, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -162,7 +162,7 @@ public class WillhabenServiceTests : TestBase
     {
         // Arrange
         var mockHttpClient = CreateMockHttpClient();
-        var config = new WillhabenAppSettings
+        var config = new WillhabenConfigDto
         {
             Keyword = "test",
             Category = 5882,
@@ -172,10 +172,10 @@ public class WillhabenServiceTests : TestBase
             ReferenceLon = 16.3738,
             MaxDistanceKm = 10,
         };
-        var service = new WillhabenService(_logger, config, mockHttpClient);
+        var service = new WillhabenService(_logger, mockHttpClient);
 
         // Act
-        var result = await service.SearchAsync(TestContext.Current.CancellationToken);
+        var result = await service.SearchAsync(config, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.All(result, listing =>
@@ -190,11 +190,11 @@ public class WillhabenServiceTests : TestBase
     {
         // Arrange
         var mockHttpClient = CreateMockHttpClient(withAttributes: true);
-        var config = new WillhabenAppSettings { Category = 5882, Rows = 100 };
-        var service = new WillhabenService(_logger, config, mockHttpClient);
+        var config = new WillhabenConfigDto { Category = 5882, Rows = 100 };
+        var service = new WillhabenService(_logger, mockHttpClient);
 
         // Act
-        var result = await service.SearchAsync(TestContext.Current.CancellationToken);
+        var result = await service.SearchAsync(config, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotEmpty(result);
@@ -225,7 +225,7 @@ public class WillhabenServiceTests : TestBase
         var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = content };
 
         var mockClient = Substitute.For<IWillhabenHttpClient>();
-        mockClient.BuildSearchUrl().Returns("https://www.willhaben.at/test");
+        mockClient.BuildSearchUrl(Arg.Any<WillhabenConfigDto>()).Returns("https://www.willhaben.at/test");
         mockClient.GetListingsAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Task.FromResult(listings));
 
         return mockClient;

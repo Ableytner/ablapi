@@ -1,5 +1,6 @@
 using AblApi.Common.Jobs;
 using AblApi.Core.AppWillhaben;
+using AblApi.Core.AppWillhaben.Dtos;
 
 namespace AblApi.Api;
 
@@ -20,7 +21,27 @@ public class DebugBackgroundService(ILogger<DebugBackgroundService> logger, ISer
         using var scope = _scopeFactory.CreateScope();
         var willhabenManager = scope.ServiceProvider.GetRequiredService<IWillhabenService>();
 
-        var result = await willhabenManager.SearchAsync();
+        var config = new WillhabenConfigDto
+        {
+            Keyword = "9060 XT",
+            Category = 5882,
+            Rows = 100,
+            PriceMin = 150,
+            PriceMax = 500,
+            FilterPaylivery = false,
+            HandoverTypes = [],
+            AllowedStates = [
+                "Steiermark", "Kärnten", "Niederösterreich", "Burgenland", "Oberösterreich", "Wien"
+            ],
+            MustInclude = [
+                "9060", "16"
+            ],
+            MustExclude = [
+                "8GB", "8 GB", "8gb"
+            ]
+        };
+
+        var result = await willhabenManager.SearchAsync(config);
         _logger.LogInformation("Found {Count} results", result.Count);
         foreach (var item in result)
         {

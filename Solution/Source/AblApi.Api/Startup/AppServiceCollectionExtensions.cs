@@ -40,10 +40,6 @@ internal static class AppServiceCollectionExtensions
             throw new InvalidOperationException("NikoBot baseurl is not configured.");
         }
         services.AddSingleton(nikobotConfig);
-
-        var willhabenConfig = new WillhabenAppSettings();
-        config.GetSection(WillhabenAppSettings.SectionName).Bind(willhabenConfig);
-        services.AddSingleton(willhabenConfig);
     }
 
     private static void AddServices(IServiceCollection services, IConfiguration config)

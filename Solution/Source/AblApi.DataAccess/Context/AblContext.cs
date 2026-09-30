@@ -14,6 +14,10 @@ public class AblContext(DbContextOptions<AblContext> options) : DbContext(option
 
     public virtual DbSet<DailyVersion> GTNHDailyVersions { get; set; }
 
+    public virtual DbSet<WillhabenConfig> WillhabenConfigs { get; set; }
+
+    public virtual DbSet<WillhabenSeenListing> WillhabenSeenListings { get; set; }
+
     public virtual DbSet<SchemaVersion> SchemaVersions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -58,6 +62,20 @@ public class AblContext(DbContextOptions<AblContext> options) : DbContext(option
             entity.Property(e => e.ClientDownloadUrlJava8).HasMaxLength(255);
             entity.Property(e => e.ServerDownloadUrl).HasMaxLength(255);
             entity.Property(e => e.ServerDownloadUrlJava8).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<WillhabenConfig>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<WillhabenSeenListing>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.Url).IsUnique();
         });
 
         modelBuilder.Entity<SchemaVersion>(entity =>

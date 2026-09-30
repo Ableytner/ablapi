@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AblApi.Common\AblApi.Common.csproj" />
+    <ProjectReference Include="..\AblApi.DataAccess\AblApi.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

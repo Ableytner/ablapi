@@ -2,6 +2,8 @@
 using AblApi.Repositories.GTNH;
 using AblApi.Repositories.Interfaces;
 using AblApi.Repositories.Interfaces.GTNH;
+using AblApi.Repositories.Interfaces.Willhaben;
+using AblApi.Repositories.Willhaben;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace AblApi.Repositories;
@@ -16,6 +18,8 @@ public class AblRepository : IAblRepository
         ApiAccessRoleGrantRepository = new ApiAccessRoleGrantRepository(Context);
         GTNHStableVersionRepository = new StableVersionRepository(Context);
         GTNHDailyVersionRepository = new DailyVersionRepository(Context);
+        WillhabenConfigRepository = new WillhabenConfigRepository(Context);
+        WillhabenSeenListingRepository = new WillhabenSeenListingRepository(Context);
     }
 
     public readonly AblContext Context;
@@ -27,6 +31,10 @@ public class AblRepository : IAblRepository
     public IStableVersionRepository GTNHStableVersionRepository { get; }
 
     public IDailyVersionRepository GTNHDailyVersionRepository { get; }
+
+    public IWillhabenConfigRepository WillhabenConfigRepository { get; }
+
+    public IWillhabenSeenListingRepository WillhabenSeenListingRepository { get; }
 
     public async Task<IDbContextTransaction> BeginTransactionAsync()
     {
