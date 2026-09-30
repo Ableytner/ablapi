@@ -7,6 +7,8 @@ public interface INikoBotService
 {
     Task<bool> SendEmbedAsync(NikoBotEmbedMessage message, CancellationToken cancellationToken = default);
 
+    bool SendLogMessage(string logLevel, string sender, string message);
+
     Task<bool> SendSuccessAsync(string title, string message, string channelId, NikoBotColor color = NikoBotColor.Green, NikoBotEmbedField[]? fields = null, CancellationToken cancellationToken = default);
 
     Task<bool> SendErrorAsync(string title, string message, string channelId, NikoBotColor color = NikoBotColor.Red, NikoBotEmbedField[]? fields = null, CancellationToken cancellationToken = default);

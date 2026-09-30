@@ -26,6 +26,11 @@ public class DebugBackgroundService(ILogger<DebugBackgroundService> logger, ISer
         {
             _logger.LogInformation("Id: {Id}, Heading: {Heading}, Description: {Description}, Price: {Price}, IsReserved: {IsReserved}, Km: {Km}, Url: {Url}", item.Id, item.Heading, item.Description, item.Price, item.IsReserved, item.Km, item.Url);
         }
+
+        using (_logger.BeginScope(new Dictionary<string, object> { { "Sender", "DebugService" } }))
+        {
+            _logger.LogError("This would go to {Service}!", "NikoBot");
+        }
     }
 
     protected override async Task Cyclic()

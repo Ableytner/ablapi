@@ -35,9 +35,11 @@ public static class LoggingBuilderExtension
             else
             {
                 configuration
-                    .WriteTo.Console();
+                    .WriteTo.Console()
+                    .WriteTo.NikoBot(services);
                 /*configuration
-                    .WriteTo.Elasticsearch(elkConfig);*/
+                    .WriteTo.Elasticsearch(elkConfig)
+                    .WriteTo.NikoBot(services);*/
             }
         });
     }

@@ -1,4 +1,5 @@
 ﻿using AblApi.Api.Logging;
+using AblApi.Core.AppNikoBot;
 using AblApi.Core.AppSettings;
 using Elastic.Channels;
 using Elastic.Ingest.Elasticsearch;
@@ -21,7 +22,7 @@ public static class LoggerSinkConfigurationExt
         {
             opts.DataStream = new DataStreamName(elkConfig.DataStreamType, elkConfig.DataStreamDataSet, elkConfig.DataStreamNamespace);
             opts.BootstrapMethod = BootstrapMethod.Failure;
-            opts.MinimumLevel = GetLogLevel(elkConfig.LogLevel);
+            opts.MinimumLevel = LogUtil.GetLogLevel(elkConfig.LogLevel);
             opts.ConfigureChannel = channelOpts =>
             {
                 channelOpts.BufferOptions = new BufferOptions
@@ -34,17 +35,12 @@ public static class LoggerSinkConfigurationExt
         });
     }
 
-    private static LogEventLevel GetLogLevel(string logLevel)
+    public static LoggerConfiguration NikoBot(this LoggerSinkConfiguration loggerConfiguration, IServiceProvider services)
     {
-        return logLevel switch
-        {
-            "Verbose" => LogEventLevel.Verbose,
-            "Debug" => LogEventLevel.Debug,
-            "Information" => LogEventLevel.Information,
-            "Warning" => LogEventLevel.Warning,
-            "Error" => LogEventLevel.Error,
-            "Fatal" => LogEventLevel.Fatal,
-            _ => LogEventLevel.Information
-        };
+        return loggerConfiguration.Async(
+            opts => opts.Sink(new NikoBotSink(() => services.GetRequiredService<INikoBotService>()), LogEventLevel.Error),
+            10000,
+            false
+        );
     }
 }
