@@ -69,10 +69,21 @@ public class GTNHService(ILogger<GTNHService> logger, GTNHAppSettings gtnhConfig
 
     public async Task<DailyVersionDto?> GetSpecificDailyVersionAsync(int runNumber, CancellationToken cancellationToken = default)
     {
+        if (runNumber < 0)
+        {
+            return null;
+        }
+
         var dbRun = await _ablRepository.GTNHDailyVersionRepository.GetByRunNumberAsync(runNumber);
         if (dbRun != null)
         {
             return DailyVersionDto.FromDbo(dbRun);
+        }
+
+        var latestRunNumber = await GetLatestDailyVersionRunNumberAsync(cancellationToken);
+        if (runNumber > latestRunNumber)
+        {
+            return null;
         }
 
         var workflowRun = await _githubService.GetOneWorkflowRunAsync(

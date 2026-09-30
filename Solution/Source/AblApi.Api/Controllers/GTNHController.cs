@@ -9,9 +9,9 @@ namespace AblApi.Api.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class GTNHController(IGTNHService gtnhManager, IMemoryCache cache, GTNHAppSettings gtnhAppSettings) : ControllerBase
+public class GTNHController(IGTNHService gtnhService, IMemoryCache cache, GTNHAppSettings gtnhAppSettings) : ControllerBase
 {
-    private readonly IGTNHService _gtnhManager = gtnhManager;
+    private readonly IGTNHService _gtnhService = gtnhService;
     private readonly IMemoryCache _cache = cache;
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(gtnhAppSettings.CacheExpirationMinutes);
     private readonly bool _isCachingEnabled = gtnhAppSettings.CacheExpirationMinutes > 0;
@@ -30,7 +30,7 @@ public class GTNHController(IGTNHService gtnhManager, IMemoryCache cache, GTNHAp
             return Ok(cachedDto);
         }
 
-        var dailyVersion = await _gtnhManager.GetLatestDailyVersionAsync(success);
+        var dailyVersion = await _gtnhService.GetLatestDailyVersionAsync(success);
 
         if (dailyVersion == null)
         {
@@ -51,7 +51,7 @@ public class GTNHController(IGTNHService gtnhManager, IMemoryCache cache, GTNHAp
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DailyVersionDto>> GetSpecificDailyVersion([FromRoute] int runNumber)
     {
-        var dailyVersion = await _gtnhManager.GetSpecificDailyVersionAsync(runNumber);
+        var dailyVersion = await _gtnhService.GetSpecificDailyVersionAsync(runNumber);
 
         if (dailyVersion == null)
         {
@@ -74,7 +74,7 @@ public class GTNHController(IGTNHService gtnhManager, IMemoryCache cache, GTNHAp
             return Ok(cachedDto);
         }
 
-        var stableVersion = await _gtnhManager.GetLatestStableVersionAsync();
+        var stableVersion = await _gtnhService.GetLatestStableVersionAsync();
 
         if (stableVersion == null)
         {
@@ -95,7 +95,7 @@ public class GTNHController(IGTNHService gtnhManager, IMemoryCache cache, GTNHAp
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<StableVersionDto>> GetSpecificStableVersion([FromRoute] string stableVersion)
     {
-        var stableVersionDto = await _gtnhManager.GetSpecificStableVersionAsync(stableVersion);
+        var stableVersionDto = await _gtnhService.GetSpecificStableVersionAsync(stableVersion);
 
         if (stableVersionDto == null)
         {
