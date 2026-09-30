@@ -1,5 +1,6 @@
 using AblApi.Core.AppGithub;
 using AblApi.Core.AppNikoBot;
+using AblApi.Core.AppWillhaben;
 using AblApi.GTNH;
 
 namespace AblApi.Api.Startup;
@@ -28,12 +29,19 @@ internal static class AppServiceCollectionExtensions
         }
         services.AddSingleton(nikobotConfig);
 
+        var willhabenConfig = new WillhabenAppSettings();
+        config.GetSection(WillhabenAppSettings.SectionName).Bind(willhabenConfig);
+        services.AddSingleton(willhabenConfig);
+
+        services.AddHostedService<DebugBackgroundService>();
         services.AddSingleton<IGithubHttpClient, GithubHttpClient>();
         services.AddTransient<IGithubService, GithubService>();
         services.AddTransient<IGTNewHorizonsService, GTNewHorizonsService>();
         services.AddTransient<IGTNHService, GTNHService>();
         services.AddTransient<INikoBotService, NikoBotService>();
-        services.AddHostedService<GTNHBackgroundService>();
+        //services.AddHostedService<GTNHBackgroundService>();
+        services.AddSingleton<IWillhabenHttpClient, WillhabenHttpClient>();
+        services.AddTransient<IWillhabenService, WillhabenService>();
 
         services.AddMemoryCache();
         services.AddLocalization();
