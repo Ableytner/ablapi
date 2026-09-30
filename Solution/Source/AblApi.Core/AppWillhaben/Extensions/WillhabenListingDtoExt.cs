@@ -5,14 +5,24 @@ namespace AblApi.Core.AppWillhaben.Extensions;
 
 public static class WillhabenListingDtoExt
 {
+    public static string? GetAttr(this WillhabenListingDto dto, string name)
+    {
+        var attr = dto.Attributes
+                      ?.Attribute
+                      ?.FirstOrDefault(a => string.Equals(a.Name, name, StringComparison.Ordinal));
+
+        return attr?.Values?.FirstOrDefault();
+    }
+
     public static double? ExtractPrice(this WillhabenListingDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Price))
+        var price = dto.GetAttr("PRICE");
+        if (string.IsNullOrWhiteSpace(price))
         {
             return null;
         }
 
-        var digits = dto.Price.Replace("EUR", "")
+        var digits = price.Replace("EUR", "")
                               .Replace("€", "")
                               .Replace(",", ".")
                               .Trim()
@@ -30,8 +40,8 @@ public static class WillhabenListingDtoExt
                 return true;
         }
 
-        var fulltext = $"{dto.Heading} {dto.BodyDyn}".ToLower();
-        if (Regex.IsMatch(fulltext, @"\breserviert\b"))
+        var fulltext = $"{dto.GetAttr("HEADING")} {dto.GetAttr("BODY_DYN")}";
+        if (Regex.IsMatch(fulltext, @"\breserviert\b", RegexOptions.IgnoreCase))
             return true;
 
         return false;
@@ -39,21 +49,21 @@ public static class WillhabenListingDtoExt
 
     public static int? ExtractKm(this WillhabenListingDto dto)
     {
-        var text = (dto.Heading ?? "") + " " + (dto.BodyDyn ?? "");
+        var fulltext = $"{dto.GetAttr("HEADING")} {dto.GetAttr("BODY_DYN")}";
 
-        var m1 = Regex.Match(text,
+        var m1 = Regex.Match(fulltext,
             @"(?:nur|nur\s*ca\.?|ca\.?)\s*(\d{1,5})\s*km",
             RegexOptions.IgnoreCase);
         if (m1.Success)
             return int.Parse(m1.Groups[1].Value);
 
-        var m2 = Regex.Match(text,
+        var m2 = Regex.Match(fulltext,
             @"(?:km(?:-|–|\s*)?Stand|km gelaufen|km gefahren|km Leistung|km Laufleistung)\D{0,5}(\d{1,5})",
             RegexOptions.IgnoreCase);
         if (m2.Success)
             return int.Parse(m2.Groups[1].Value);
 
-        var m3 = Regex.Match(text,
+        var m3 = Regex.Match(fulltext,
             @"(\d{1,5})\s*(?:km\s*(?:gelaufen|gefahren|Leistung|Laufleistung|Stand))",
             RegexOptions.IgnoreCase);
         if (m3.Success)
@@ -64,9 +74,10 @@ public static class WillhabenListingDtoExt
 
     public static double? ExtractDistance(this WillhabenListingDto dto, WillhabenAppSettings settings)
     {
-        if (dto.Coordinates != null)
+        var coordinates = dto.GetAttr("COORDINATES");
+        if (coordinates != null)
         {
-            var coords = dto.Coordinates.Split(',');
+            var coords = coordinates.Split(',');
             if (coords.Length == 2 &&
                 double.TryParse(coords[0], out var lat) &&
                 double.TryParse(coords[1], out var lon) &&

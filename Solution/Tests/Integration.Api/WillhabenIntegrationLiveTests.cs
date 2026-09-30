@@ -1,5 +1,6 @@
 using System.Text.Json;
 using AblApi.Core.AppWillhaben;
+using AblApi.Core.AppWillhaben.Extensions;
 
 namespace Integration.Api;
 
@@ -30,12 +31,12 @@ public class WillhabenIntegrationLiveTests
             Console.WriteLine($"=== Listing ===");
             Console.WriteLine($"  Id:        {dto.Id}");
             Console.WriteLine($"  AdId:      {dto.AdId}");
-            Console.WriteLine($"  Heading:   {dto.Heading}");
-            Console.WriteLine($"  Price:     {dto.Price}");
-            Console.WriteLine($"  Location:  {dto.Location}");
-            Console.WriteLine($"  State:     {dto.State}");
-            Console.WriteLine($"  SeoUrl:    {dto.SeoUrl}");
-            Console.WriteLine($"  Coordinates: {dto.Coordinates}");
+            Console.WriteLine($"  Heading:   {dto.GetAttr("HEADING")}");
+            Console.WriteLine($"  Price:     {dto.GetAttr("PRICE")}");
+            Console.WriteLine($"  Location:  {dto.GetAttr("LOCATION")}");
+            Console.WriteLine($"  State:     {dto.GetAttr("STATE")}");
+            Console.WriteLine($"  SeoUrl:    {dto.GetAttr("SEO_URL")}");
+            Console.WriteLine($"  Coordinates: {dto.GetAttr("COORDINATES")}");
             Console.WriteLine($"  AdvertStatus: {dto.AdvertStatus?.Description}");
             Console.WriteLine();
         }
@@ -44,8 +45,8 @@ public class WillhabenIntegrationLiveTests
         Assert.All(dtos, dto =>
         {
             Assert.NotNull(dto.Id);
-            Assert.NotNull(dto.Heading);
-            Assert.NotNull(dto.SeoUrl);
+            Assert.NotNull(dto.GetAttr("HEADING"));
+            Assert.NotNull(dto.GetAttr("SEO_URL"));
         });
     }
 

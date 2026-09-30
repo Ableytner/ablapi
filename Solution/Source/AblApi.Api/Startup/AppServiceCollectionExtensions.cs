@@ -9,6 +9,18 @@ internal static class AppServiceCollectionExtensions
 {
     public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration config)
     {
+        AddAppSettings(services, config);
+        AddServices(services, config);
+        AddBackgroundServices(services, config);
+
+        services.AddMemoryCache();
+        services.AddLocalization();
+
+        return services;
+    }
+
+    private static void AddAppSettings(IServiceCollection services, IConfiguration config)
+    {
         var githubConfig = new GithubAppSettings();
         config.GetSection(GithubAppSettings.SectionName).Bind(githubConfig);
         if (string.IsNullOrEmpty(githubConfig.Token) || githubConfig.Token == "GITHUBTOKEN")
@@ -32,21 +44,26 @@ internal static class AppServiceCollectionExtensions
         var willhabenConfig = new WillhabenAppSettings();
         config.GetSection(WillhabenAppSettings.SectionName).Bind(willhabenConfig);
         services.AddSingleton(willhabenConfig);
+    }
 
-//        services.AddHostedService<DebugBackgroundService>();
-
+    private static void AddServices(IServiceCollection services, IConfiguration config)
+    {
         services.AddSingleton<IGithubHttpClient, GithubHttpClient>();
         services.AddTransient<IGithubService, GithubService>();
+
         services.AddTransient<IGTNewHorizonsService, GTNewHorizonsService>();
         services.AddTransient<IGTNHService, GTNHService>();
+
         services.AddTransient<INikoBotService, NikoBotService>();
-        services.AddHostedService<GTNHBackgroundService>();
+
         services.AddSingleton<IWillhabenHttpClient, WillhabenHttpClient>();
         services.AddTransient<IWillhabenService, WillhabenService>();
+    }
 
-        services.AddMemoryCache();
-        services.AddLocalization();
+    private static void AddBackgroundServices(IServiceCollection services, IConfiguration config)
+    {
+//        services.AddHostedService<DebugBackgroundService>();
 
-        return services;
+        services.AddHostedService<GTNHBackgroundService>();
     }
 }

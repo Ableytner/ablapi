@@ -1,5 +1,6 @@
 using AblApi.Core.AppWillhaben.Domain;
 using AblApi.Core.AppWillhaben.Dtos;
+using AblApi.Core.AppWillhaben.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace AblApi.Core.AppWillhaben;
@@ -47,7 +48,7 @@ public class WillhabenService(ILogger<WillhabenService> logger, WillhabenAppSett
     private bool FilterFunc(WillhabenListingDto dto)
     {
         // Keyword filter
-        var fullText = $"{dto.Heading} {dto.Description} {dto.BodyDyn}";
+        var fullText = $"{dto.GetAttr("HEADING")} {dto.GetAttr("DESCRIPTION")} {dto.GetAttr("BODY_DYN")}";
         if (_settings.MustInclude.Count > 0)
         {
             if (!_settings.MustInclude.All(kw => fullText.Contains(kw, StringComparison.CurrentCultureIgnoreCase)))
@@ -66,7 +67,8 @@ public class WillhabenService(ILogger<WillhabenService> logger, WillhabenAppSett
         // Bundesland filter
         if (_settings.AllowedStates.Count > 0)
         {
-            if (string.IsNullOrEmpty(dto.State) || !_settings.AllowedStates.Contains(dto.State))
+            var state = dto.GetAttr("STATE");
+            if (string.IsNullOrEmpty(state) || !_settings.AllowedStates.Contains(state))
             {
                 return false;
             }
