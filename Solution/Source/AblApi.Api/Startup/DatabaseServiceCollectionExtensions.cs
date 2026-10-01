@@ -1,4 +1,4 @@
-﻿using AblApi.Core;
+﻿using AblApi.Common.Utilities;
 using AblApi.Core.AppSettings;
 using AblApi.DataAccess;
 using AblApi.DataAccess.Context;

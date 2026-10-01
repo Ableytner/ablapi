@@ -1,5 +1,5 @@
 ﻿using AblApi.Api.Logging;
-using AblApi.Core;
+using AblApi.Common.Utilities;
 using AblApi.Core.AppSettings;
 using Serilog;
 
