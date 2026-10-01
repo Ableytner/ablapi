@@ -7,9 +7,19 @@ using System.Text;
 
 namespace AblApi.Core.AppJwtToken;
 
-public class JwtTokenService(JwtAppSettings jwtSettings) : IJwtTokenService
+public class JwtTokenService : IJwtTokenService
 {
-    private readonly JwtAppSettings _jwtSettings = jwtSettings;
+    private readonly JwtAppSettings _jwtSettings;
+
+    public JwtTokenService(JwtAppSettings jwtSettings)
+    {
+        if (jwtSettings.Key.Length != 32)
+        {
+            throw new InvalidOperationException($"JWT key must be exactly 32 characters long! (is {jwtSettings.Key.Length})");
+        }
+
+        _jwtSettings = jwtSettings;
+    }
 
     public JwtToken CreateToken(Guid userId, IEnumerable<ApiAccessRole> roles)
     {

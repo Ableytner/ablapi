@@ -1,5 +1,5 @@
 using AblApi.Api;
-using AblApi.Api.Startup;
+using AblApi.Common.Extensions;
 using AblApi.DataAccess.Context;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

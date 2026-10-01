@@ -1,4 +1,4 @@
-using AblApi.Core;
+using AblApi.Common.Utilities;
 using Tests.Common.Mocks;
 
 namespace Integration.Api.Fixture;
