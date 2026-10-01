@@ -15,11 +15,11 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
 
-RUN echo 'alias sqltool="dotnet AblApi.SqlTool.dll"' >> ~/.bashrc
-
 ENV DOTNET_ENVIRONMENT=PROD
 
 # The container runs as the non-root `app` user (UID 1654, built into the aspnet base image).
 USER app
+
+RUN echo 'alias sqltool="dotnet AblApi.SqlTool.dll"' >> ~/.bashrc
 
 ENTRYPOINT ["tail", "-f", "/dev/null"]
