@@ -1,6 +1,4 @@
-using AblApi.Common;
-
-namespace AblApi.Core;
+namespace AblApi.Common.Utilities;
 
 public static class EnvironmentHelper
 {

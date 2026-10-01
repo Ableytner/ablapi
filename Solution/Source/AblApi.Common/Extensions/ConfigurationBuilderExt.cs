@@ -1,7 +1,7 @@
-﻿using AblApi.Common;
-using AblApi.Core;
+﻿using AblApi.Common.Utilities;
+using Microsoft.Extensions.Configuration;
 
-namespace AblApi.Api.Startup;
+namespace AblApi.Common.Extensions;
 
 public static class ConfigurationBuilderExtensions
 {
