@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Solution/Source/AblApi.Api/AblApi.Api.csproj",
+                "${workspaceFolder}/Solution/Tools/AblApi.SqlTool/AblApi.SqlTool.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],

@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Migrations\0001-initial-db-20260821.sql" />
+    <EmbeddedResource Include="Migrations\0002-create-willhaben-configs-and-listings-tables.sql" />
   </ItemGroup>
 
 </Project>
