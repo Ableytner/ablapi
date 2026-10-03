@@ -73,7 +73,7 @@ public class Program
 
     private static void RunNonInteractive(List<BaseTask> tasks, string[] args)
     {
-        var requestedCommand = args[0];
+        var requestedCommand = args.SkipWhile(a => a == "--ci").FirstOrDefault();
         var command = tasks.FirstOrDefault(t => t.Command == requestedCommand);
         if (command == null)
         {
@@ -81,7 +81,7 @@ public class Program
             Environment.Exit(1);
         }
 
-        command.RunCi(args[1..]);
+        command.RunCi(args.SkipWhile(a => a == "--ci").Skip(1).ToArray());
     }
 
     private static AppConfig GetAppConfig()

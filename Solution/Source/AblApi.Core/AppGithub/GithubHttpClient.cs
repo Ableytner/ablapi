@@ -1,5 +1,4 @@
 ﻿using AblApi.Common;
-using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Text;
 

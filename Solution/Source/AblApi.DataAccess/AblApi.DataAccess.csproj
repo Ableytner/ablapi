@@ -21,6 +21,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\0001-initial-db-20260821.sql" />
     <EmbeddedResource Include="Migrations\0002-create-willhaben-configs-and-listings-tables.sql" />
+    <EmbeddedResource Include="Migrations\0003-expand-apiusers-name-and-token-to-varchar255-20261003.sql" />
   </ItemGroup>
 
 </Project>

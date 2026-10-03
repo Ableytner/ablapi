@@ -1,8 +1,10 @@
+using AblApi.Common.Extensions;
 using AblApi.Common.Jobs;
+using AblApi.Core.AppLogging.Dtos;
 using AblApi.Core.AppWillhaben;
 using AblApi.Core.AppWillhaben.Dtos;
 
-namespace AblApi.Api;
+namespace AblApi.Api.DebugUtil;
 
 // Used to manually debug locally
 public class DebugBackgroundService(ILogger<DebugBackgroundService> logger, IServiceScopeFactory scopeFactory) : CyclicBackgroundService(logger)
@@ -62,5 +64,22 @@ public class DebugBackgroundService(ILogger<DebugBackgroundService> logger, ISer
         {
             _logger.LogError("This would go to {Service}!", "NikoBot");
         }
+    }
+
+    private async Task TestLogController()
+    {
+        var httpClient = new DebugHttpClient();
+
+        var logMessageDto = new LogMessageDto()
+        {
+            LogLevel = "Error",
+            Sender = "DebugBackgroundService",
+            Message = "This message was sent to the LogController"
+        };
+        var request = JsonContent.Create(logMessageDto);
+        _logger.LogInformation(request.ReadAsString());
+
+        var response = await httpClient.PostAsync("log", request);
+        _logger.LogInformation(response.Content.ReadAsString());
     }
 }
