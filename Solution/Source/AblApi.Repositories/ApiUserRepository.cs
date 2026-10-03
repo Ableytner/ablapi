@@ -14,6 +14,20 @@ public class ApiUserRepository(AblContext context) : GenericRepository<ApiUser>(
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
+    public override void Add(ApiUser entity)
+    {
+        var exists = Context.ApiUsers
+            .ToList()
+            .Any(u => string.Equals(u.Name, entity.Name, StringComparison.OrdinalIgnoreCase));
+
+        if (exists)
+        {
+            throw new InvalidOperationException($"An ApiUser with name '{entity.Name}' already exists.");
+        }
+
+        base.Add(entity);
+    }
+
     public async Task UpsertAsync(ApiUser entity)
     {
         var record = await Context.ApiUsers.Where(x => x.Id == entity.Id).FirstOrDefaultAsync();

@@ -37,7 +37,7 @@ public class GenericRepository<T>(AblContext context) : IGenericRepository<T> wh
 
     // ------------------------------------------------------------
     // Section Adders
-    public void Add(T entity)
+    public virtual void Add(T entity)
     {
         Context.Set<T>().Add(entity);
     }

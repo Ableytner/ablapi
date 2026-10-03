@@ -1,10 +1,7 @@
 using AblApi.Common.Utilities;
 using AblApi.Common.Enums;
-using AblApi.DataAccess.Context;
-using AblApi.DataAccess.Extensions;
 using AblApi.DataAccess.Models;
 using AblApi.Repositories;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 
 namespace AblApi.SqlTool.Tasks;
@@ -126,6 +123,10 @@ public class CreateApiUserTask(AppConfig config) : BaseTask(config)
             Console.WriteLine($"Id: {user.Id}");
             Console.WriteLine($"Token: {plainToken}");
         }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+        {
+            Console.WriteLine(ex.Message);
+        }
         catch (Exception ex)
         {
             Console.WriteLine("Creating the ApiUser failed: " + ex.Message);
@@ -186,14 +187,6 @@ public class CreateApiUserTask(AppConfig config) : BaseTask(config)
 
             return selectedRoles;
         }
-    }
-
-    private AblContext CreateContext()
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<AblContext>();
-        optionsBuilder.ConfigureDatabase(Config.Database.Type, Config.Database.Connection);
-
-        return new AblContext(optionsBuilder.Options);
     }
 
     private static string GenerateToken()
