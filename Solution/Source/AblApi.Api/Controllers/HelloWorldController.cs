@@ -18,8 +18,7 @@ public class HelloWorldController : ControllerBase
         return "Hello, World!";
     }
 
-    [HttpGet]
-    [Route("private/")]
+    [HttpGet("private")]
     [AuthorizeRegistered]
     [EndpointSummary("Get a greeting for registered users")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -29,8 +28,7 @@ public class HelloWorldController : ControllerBase
         return $"Hello, registered user!";
     }
 
-    [HttpGet]
-    [Route("admin/")]
+    [HttpGet("admin")]
     [AuthorizeAdmin]
     [EndpointSummary("Get a greeting for admin users")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -40,8 +38,7 @@ public class HelloWorldController : ControllerBase
         return $"Hello, Admin!";
     }
 
-    [HttpGet]
-    [Route("log/")]
+    [HttpGet("log")]
     [AuthorizeLog]
     [EndpointSummary("Get a greeting for log clients")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -51,8 +48,7 @@ public class HelloWorldController : ControllerBase
         return $"Hello, Log client!";
     }
 
-    [HttpGet]
-    [Route("discord/")]
+    [HttpGet("discord")]
     [AuthorizeDiscordSendToAll]
     [EndpointSummary("Get a greeting for Discord message senders")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]

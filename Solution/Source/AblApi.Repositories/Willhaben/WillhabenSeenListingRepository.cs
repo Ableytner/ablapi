@@ -1,6 +1,7 @@
 using AblApi.DataAccess.Context;
-using AblApi.DataAccess.Models;
+using AblApi.DataAccess.Models.Willhaben;
 using AblApi.Repositories.Interfaces.Willhaben;
+using Microsoft.EntityFrameworkCore;
 
 namespace AblApi.Repositories.Willhaben;
 
@@ -18,5 +19,14 @@ public class WillhabenSeenListingRepository(AblContext context) : GenericReposit
     public bool Exists(string url, double price)
     {
         return Context.WillhabenSeenListings.Any(e => e.Url == url && e.Price == price);
+    }
+
+    public async Task RemoveByUrlAsync(string url)
+    {
+        var entity = await Context.WillhabenSeenListings.FirstOrDefaultAsync(e => e.Url == url);
+        if (entity is not null)
+        {
+            Remove(entity);
+        }
     }
 }

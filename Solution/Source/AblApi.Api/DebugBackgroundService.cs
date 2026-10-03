@@ -19,7 +19,7 @@ public class DebugBackgroundService(ILogger<DebugBackgroundService> logger, ISer
         _logger.LogInformation("DebugBackgroundService started.");
 
         using var scope = _scopeFactory.CreateScope();
-        var willhabenManager = scope.ServiceProvider.GetRequiredService<IWillhabenService>();
+        var willhabenService = scope.ServiceProvider.GetRequiredService<IWillhabenService>();
 
         var config = new WillhabenConfigDto
         {
@@ -41,7 +41,17 @@ public class DebugBackgroundService(ILogger<DebugBackgroundService> logger, ISer
             ]
         };
 
-        var result = await willhabenManager.SearchAsync(config);
+        await willhabenService.CreateConfigAsync(config);
+    }
+
+    protected override async Task Cyclic()
+    {
+        
+    }
+
+    private async Task SearchAndPrintWillhabenConfig(IWillhabenService service, WillhabenConfigDto config)
+    {
+        var result = await service.SearchAsync(config);
         _logger.LogInformation("Found {Count} results", result.Count);
         foreach (var item in result)
         {
@@ -52,10 +62,5 @@ public class DebugBackgroundService(ILogger<DebugBackgroundService> logger, ISer
         {
             _logger.LogError("This would go to {Service}!", "NikoBot");
         }
-    }
-
-    protected override async Task Cyclic()
-    {
-        
     }
 }

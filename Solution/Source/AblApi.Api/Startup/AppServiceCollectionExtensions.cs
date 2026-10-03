@@ -1,3 +1,4 @@
+using AblApi.Common.Utilities;
 using AblApi.Core.AppGithub;
 using AblApi.Core.AppNikoBot;
 using AblApi.Core.AppWillhaben;
@@ -58,8 +59,12 @@ internal static class AppServiceCollectionExtensions
 
     private static void AddBackgroundServices(IServiceCollection services, IConfiguration config)
     {
-//        services.AddHostedService<DebugBackgroundService>();
-
         services.AddHostedService<GTNHBackgroundService>();
+        services.AddHostedService<WillhabenBackgroundService>();
+
+        if (EnvironmentHelper.IsDevelopment())
+        {
+            services.AddHostedService<DebugBackgroundService>();
+        }
     }
 }

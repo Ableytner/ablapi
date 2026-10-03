@@ -1,14 +1,16 @@
 using AblApi.Core.AppWillhaben.Domain;
 using AblApi.Core.AppWillhaben.Dtos;
 using AblApi.Core.AppWillhaben.Extensions;
+using AblApi.Repositories.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AblApi.Core.AppWillhaben;
 
-public class WillhabenService(ILogger<WillhabenService> logger, IWillhabenHttpClient httpClient) : IWillhabenService
+public class WillhabenService(ILogger<WillhabenService> logger, IWillhabenHttpClient httpClient, IAblRepository ablRepository) : IWillhabenService
 {
     private readonly ILogger<WillhabenService> _logger = logger;
     private readonly IWillhabenHttpClient _httpClient = httpClient;
+    private readonly IAblRepository _ablRepository = ablRepository;
 
     public async Task<List<WillhabenListing>> SearchAsync(WillhabenConfigDto config, CancellationToken cancellationToken = default)
     {
@@ -42,6 +44,43 @@ public class WillhabenService(ILogger<WillhabenService> logger, IWillhabenHttpCl
         }
 
         return domainListings;
+    }
+
+    public async Task<WillhabenConfigDto> CreateConfigAsync(WillhabenConfigDto dto, CancellationToken cancellationToken = default)
+    {
+        var dbo = dto.ToDbo();
+        await _ablRepository.WillhabenConfigRepository.AddAsync(dbo);
+        return WillhabenConfigDto.FromDbo(dbo);
+    }
+
+    public async Task<WillhabenConfigDto> UpdateConfigAsync(WillhabenConfigDto dto, CancellationToken cancellationToken = default)
+    {
+        var dbo = dto.ToDbo();
+        await _ablRepository.WillhabenConfigRepository.UpsertAsync(dbo);
+        return WillhabenConfigDto.FromDbo(dbo);
+    }
+
+    public async Task DeleteConfigAsync(string name, CancellationToken cancellationToken = default)
+    {
+        await _ablRepository.WillhabenConfigRepository.RemoveByNameAsync(name);
+    }
+
+    public async Task<List<WillhabenConfigDto>> ListConfigsAsync(CancellationToken cancellationToken = default)
+    {
+        var configs = await _ablRepository.WillhabenConfigRepository.GetAllAsListAsync();
+        return configs.Select(WillhabenConfigDto.FromDbo).ToList();
+    }
+
+    public async Task AddSeenListingAsync(WillhabenListing listing, CancellationToken cancellationToken = default)
+    {
+        await _ablRepository.WillhabenSeenListingRepository.RemoveByUrlAsync(listing.Url);
+        _ablRepository.WillhabenSeenListingRepository.AddListing(listing.Url, listing.Price ?? 0);
+        await _ablRepository.SaveChangesAsync();
+    }
+
+    public Task<bool> HasSeenListingAsync(WillhabenListing listing, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_ablRepository.WillhabenSeenListingRepository.Exists(listing.Url, listing.Price ?? 0));
     }
 
     private static bool FilterFunc(WillhabenListingDto dto, WillhabenConfigDto config)

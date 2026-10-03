@@ -1,4 +1,4 @@
-using AblApi.DataAccess.Models;
+using AblApi.DataAccess.Models.Willhaben;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

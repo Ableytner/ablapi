@@ -1,4 +1,4 @@
-using AblApi.DataAccess.Models;
+using AblApi.DataAccess.Models.Willhaben;
 
 namespace AblApi.Repositories.Interfaces.Willhaben;
 
@@ -7,4 +7,6 @@ public interface IWillhabenSeenListingRepository : IGenericRepository<WillhabenS
     public void AddListing(string url, double price);
 
     public bool Exists(string url, double price);
+
+    Task RemoveByUrlAsync(string url);
 }

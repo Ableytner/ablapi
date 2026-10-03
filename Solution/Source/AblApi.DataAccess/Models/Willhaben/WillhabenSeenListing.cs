@@ -1,4 +1,4 @@
-namespace AblApi.DataAccess.Models;
+namespace AblApi.DataAccess.Models.Willhaben;
 
 public class WillhabenSeenListing
 {

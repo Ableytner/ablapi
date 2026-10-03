@@ -5,5 +5,6 @@ public enum ApiAccessRole
     Admin,
     DiscordSendToAll,
     DiscordSendToOwner,
-    Log
+    Log,
+    WillhabenConfig
 }

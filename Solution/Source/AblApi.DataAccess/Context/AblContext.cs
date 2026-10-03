@@ -1,5 +1,6 @@
 ﻿using AblApi.DataAccess.Models;
 using AblApi.DataAccess.Models.GTNH;
+using AblApi.DataAccess.Models.Willhaben;
 using Microsoft.EntityFrameworkCore;
 
 namespace AblApi.DataAccess.Context;
