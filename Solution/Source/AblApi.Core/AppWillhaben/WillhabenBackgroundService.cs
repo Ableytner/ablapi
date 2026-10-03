@@ -12,7 +12,7 @@ namespace AblApi.Core.AppWillhaben;
 public class WillhabenBackgroundService(ILogger<WillhabenBackgroundService> logger, IServiceScopeFactory scopeFactory) : CyclicBackgroundService(logger)
 {
     protected override string Name => nameof(WillhabenBackgroundService);
-    protected override TimeSpan CycleTime => TimeSpan.FromMinutes(1);
+    protected override TimeSpan CycleTime => TimeSpan.FromMinutes(15);
 
     private readonly ILogger<WillhabenBackgroundService> _logger = logger;
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
