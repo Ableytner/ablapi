@@ -16,6 +16,11 @@ internal static class EndpointServiceCollectionExtensions
 			opt.AddDefaultPolicy(build =>
 			{
 				var origins = corsConfig.AllowedOriginsArray;
+
+				var loggerFactory = services.BuildServiceProvider().GetRequiredService<ILoggerFactory>();
+				loggerFactory.CreateLogger("AblApi.Api.Startup.EndpointServiceCollectionExtensions")
+					         .LogInformation("Allowed CORS origins: [{Origins}]", string.Join(", ", origins));
+
 				if (origins.Length > 0)
 				{
 					build.WithOrigins(origins)
