@@ -12,7 +12,7 @@ def get_jwt_token(base_url: str, user_id: str, user_token: str) -> str:
 	response.raise_for_status()
 
 	data = response.json()
-	token = data["Token"]
+	token = data["token"]
 	print(f"Received token, expires at {data['ExpiresAt']}")
 	return token
 
