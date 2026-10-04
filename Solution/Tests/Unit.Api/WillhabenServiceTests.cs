@@ -35,7 +35,7 @@ public class WillhabenServiceTests(InMemorySqliteDbFixture fixture) : IClassFixt
         Assert.Equal(50, result.Rows);
         Assert.Equal(5000, result.PriceMin);
         Assert.Equal(20000, result.PriceMax);
-        Assert.False(result.FilterPaylivery);
+        Assert.Equal(0, result.FilterPaylivery);
         AssertJsonList(result.HandoverTypes, "Abholung", "Lieferung");
         AssertJsonList(result.AllowedStates, "Wien", "Niederosterrich");
         Assert.Equal(100000, result.KmMax);

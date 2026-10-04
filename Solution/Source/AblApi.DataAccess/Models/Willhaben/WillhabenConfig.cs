@@ -16,7 +16,7 @@ public class WillhabenConfig
 
     public int PriceMax { get; set; }
 
-    public bool FilterPaylivery { get; set; }
+    public int FilterPaylivery { get; set; }
 
     public string HandoverTypes { get; set; } = string.Empty;
 
