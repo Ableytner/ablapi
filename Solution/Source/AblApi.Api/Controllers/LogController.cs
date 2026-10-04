@@ -20,10 +20,12 @@ public class LogController : ControllerBase
         _logger = logger;
 
 //        _forwardLogger = new LoggerConfiguration()
+//                             .Enrich.FromLogContext()
 //                             .WriteTo.Elasticsearch(elkConfig)
 //                             .WriteTo.NikoBot(services)
 //                             .CreateLogger();
         _forwardLogger = new LoggerConfiguration()
+                             .Enrich.FromLogContext()
                              .WriteTo.NikoBot(services)
                              .CreateLogger();
     }
@@ -35,7 +37,7 @@ public class LogController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult> Log([FromBody] LogMessageDto message)
     {
-        _logger.LogDebug("Received request to log {Severity} from {Sender}: {Content}", message.LogLevel, message.Sender, message.Message);
+        _logger.LogInformation("Received request to log {Severity} from {Sender}: {Content}", message.LogLevel, message.Sender, message.Message);
 
         using (LogContext.PushProperty("Sender", message.Sender))
         {
