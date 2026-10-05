@@ -2,6 +2,7 @@ using AblApi.Api.DebugUtil;
 using AblApi.Common.Utilities;
 using AblApi.Core.AppGithub;
 using AblApi.Core.AppNikoBot;
+using AblApi.Core.AppSpotify;
 using AblApi.Core.AppWillhaben;
 using AblApi.GTNH;
 
@@ -42,6 +43,10 @@ internal static class AppServiceCollectionExtensions
             throw new InvalidOperationException("NikoBot baseurl is not configured.");
         }
         services.AddSingleton(nikobotConfig);
+
+        var spotifyConfig = new SpotifyAppSettings();
+        config.GetSection(SpotifyAppSettings.SectionName).Bind(spotifyConfig);
+        services.AddSingleton(spotifyConfig);
     }
 
     private static void AddServices(IServiceCollection services, IConfiguration config)
@@ -56,6 +61,9 @@ internal static class AppServiceCollectionExtensions
 
         services.AddSingleton<IWillhabenHttpClient, WillhabenHttpClient>();
         services.AddTransient<IWillhabenService, WillhabenService>();
+
+        services.AddSingleton<SpotifyClientFactory>();
+        services.AddTransient<ISpotifyService, SpotifyService>();
     }
 
     private static void AddBackgroundServices(IServiceCollection services, IConfiguration config)
