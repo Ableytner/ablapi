@@ -60,4 +60,7 @@ public class GithubReleaseAssetDto
 
     [JsonPropertyName("url")]
     public required string Url { get; set; }
+
+    [JsonPropertyName("browser_download_url")]
+    public required string BrowserDownloadUrl { get; set; }
 }

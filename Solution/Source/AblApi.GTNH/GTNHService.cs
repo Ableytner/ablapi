@@ -221,11 +221,11 @@ public class GTNHService(ILogger<GTNHService> logger, GTNHAppSettings gtnhConfig
             if (WebMapVersionRegex.IsMatch(asset.Name))
             {
                 var version = WebMapVersionRegex.Replace(asset.Name, "$1");
-                _logger.LogInformation("Found web map asset: {Name} -> {Url} (v{Version})", asset.Name, asset.Url, version);
+                _logger.LogInformation("Found web map asset: {Name} -> {Url} (v{Version})", asset.Name, asset.BrowserDownloadUrl, version);
                 return new WebMapDto
                 {
                     Version = version,
-                    DownloadUrl = asset.Url
+                    DownloadUrl = asset.BrowserDownloadUrl
                 };
             }
         }
