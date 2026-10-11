@@ -161,6 +161,23 @@ public class GithubService(ILogger<GithubService> logger, IGithubHttpClient http
         return workflowArtifacts ?? throw new InvalidOperationException("Failed to deserialize workflow artifacts.");
     }
 
+    public async Task<GithubReleaseDto?> GetLatestReleaseAsync(string owner, string repo, CancellationToken cancellationToken = default)
+    {
+        var url = $"repos/{owner}/{repo}/releases/latest";
+        _logger.LogInformation("Fetching latest release from {Url}", url);
+
+        var response = await _httpClient.GetAsync(url, cancellationToken);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        var release = JsonSerializer.Deserialize<GithubReleaseDto>(content);
+        return release;
+    }
+
     private async Task<WorkflowRunsDto> GetPagedWorkflowRunsAsync(string owner, string repo, string workflowId, int page, int perPage, CancellationToken cancellationToken = default)
     {
         if (page < 1)

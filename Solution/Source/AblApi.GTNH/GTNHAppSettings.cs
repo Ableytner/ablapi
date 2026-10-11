@@ -15,4 +15,8 @@ public class GTNHAppSettings
 	public string DailyBuildsWorkflowId { get; set; }
 
 	public int CacheExpirationMinutes { get; set; }
+
+    public string WebMapRepoOwner { get; set; }
+
+    public string WebMapRepoName { get; set; }
 }

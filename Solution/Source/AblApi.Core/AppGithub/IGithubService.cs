@@ -20,4 +20,6 @@ public interface IGithubService
     public Task<List<WorkflowRunDto>> GetAllWorkflowRunsAsync(string owner, string repo, string workflowId, Func<WorkflowRunDto, bool>? filter = null, CancellationToken cancellationToken = default);
 
     public Task<WorkflowArtifactsDto> GetWorkflowArtifactsAsync(string owner, string repo, long runId, CancellationToken cancellationToken = default);
+
+    public Task<GithubReleaseDto?> GetLatestReleaseAsync(string owner, string repo, CancellationToken cancellationToken = default);
 }

@@ -14,6 +14,7 @@ public class GithubServiceTests : TestBase
     private readonly IGithubHttpClient _mockHttpClient;
 
     private readonly string _owner = "GTNewHorizons";
+    private readonly string _releaseRepo = "GT5-Unofficial";
     private readonly string _repo = "DreamAssemblerXXL";
     private readonly string _workflowId = "daily-modpack-build.yml";
     private readonly long _runId = 30980037491L;
@@ -186,6 +187,31 @@ public class GithubServiceTests : TestBase
         // Assert
         Assert.NotNull(result);
         Assert.Equal(5, result.TotalCount);
+    }
+
+//    [Fact]
+    [Fact(Skip = "Live API test")]
+    public async Task GetLatestReleaseAsync_ParsesRealJson()
+    {
+        // Arrange
+        var service = new GithubService(_logger, _realHttpClient);
+
+        // Act
+        var release = await service.GetLatestReleaseAsync(_owner, _releaseRepo, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.NotNull(release);
+
+        Console.WriteLine($"=== Latest Release ===");
+        Console.WriteLine($"  Id:            {release.Id}");
+        Console.WriteLine($"  Name:          {release.Name}");
+        Console.WriteLine($"  Prerelease:    {release.Prerelease}");
+        Console.WriteLine($"  PublishedAt:   {release.PublishedAt}");
+        Console.WriteLine($"  Assets:        {release.Assets.Length}");
+
+        // Basic sanity checks
+        Assert.NotEqual(0, release.Id);
+        Assert.NotNull(release.Assets);
     }
 
     private HttpResponseMessage GetWorkflowRuns_1()
