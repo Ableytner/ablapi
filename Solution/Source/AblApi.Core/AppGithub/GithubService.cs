@@ -193,7 +193,7 @@ public class GithubService(ILogger<GithubService> logger, IGithubHttpClient http
             throw new ArgumentOutOfRangeException(nameof(perPage), $"perPage cannot be greater than {_workflowsPerPage}.");
         }
 
-        var url = $"repos/{owner}/{repo}/actions/workflows/{workflowId}/runs?page={page}&per_page={perPage}";
+        var url = $"repos/{owner}/{repo}/actions/workflows/{workflowId}/runs?page={page}&per_page={perPage}&status=completed";
         _logger.LogInformation("Fetching paged workflow runs: {Url}", url);
 
         var response = await _httpClient.GetAsync(url, cancellationToken);

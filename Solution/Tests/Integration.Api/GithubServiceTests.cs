@@ -25,15 +25,15 @@ public class GithubServiceTests : TestBase
 
         _mockHttpClient = Substitute.For<IGithubHttpClient>();
         _mockHttpClient.GetAsync(
-            $"repos/{_owner}/{_repo}/actions/workflows/{_workflowId}/runs?page=1&per_page=1",
+            $"repos/{_owner}/{_repo}/actions/workflows/{_workflowId}/runs?page=1&per_page=1&status=completed",
             Arg.Any<CancellationToken>()).Returns(Task.FromResult(GetWorkflowRuns_1())
         );
         _mockHttpClient.GetAsync(
-            $"repos/{_owner}/{_repo}/actions/workflows/{_workflowId}/runs?page=1&per_page=100",
+            $"repos/{_owner}/{_repo}/actions/workflows/{_workflowId}/runs?page=1&per_page=100&status=completed",
             Arg.Any<CancellationToken>()).Returns(Task.FromResult(GetWorkflowRuns_100_Page1())
         );
         _mockHttpClient.GetAsync(
-            $"repos/{_owner}/{_repo}/actions/workflows/{_workflowId}/runs?page=2&per_page=100",
+            $"repos/{_owner}/{_repo}/actions/workflows/{_workflowId}/runs?page=2&per_page=100&status=completed",
             Arg.Any<CancellationToken>()).Returns(Task.FromResult(GetWorkflowRuns_100_Page2())
         );
 

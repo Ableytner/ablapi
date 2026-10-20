@@ -36,15 +36,15 @@ public class GTNHTestApiFactory(string databaseName, string gtnhStableVersionApi
         mockHttpClient.TestToken().Returns(Task.FromResult(true));
 
         mockHttpClient.GetAsync(
-            $"repos/{owner}/{repo}/actions/workflows/{workflowId}/runs?page=1&per_page=1",
+            $"repos/{owner}/{repo}/actions/workflows/{workflowId}/runs?page=1&per_page=1&status=completed",
             Arg.Any<CancellationToken>()).Returns(Task.FromResult(JsonResponse("Data/workflowruns_1.json")));
 
         mockHttpClient.GetAsync(
-            $"repos/{owner}/{repo}/actions/workflows/{workflowId}/runs?page=1&per_page=100",
+            $"repos/{owner}/{repo}/actions/workflows/{workflowId}/runs?page=1&per_page=100&status=completed",
             Arg.Any<CancellationToken>()).Returns(Task.FromResult(JsonResponse("Data/workflowruns_100_page1.json")));
 
         mockHttpClient.GetAsync(
-            $"repos/{owner}/{repo}/actions/workflows/{workflowId}/runs?page=2&per_page=100",
+            $"repos/{owner}/{repo}/actions/workflows/{workflowId}/runs?page=2&per_page=100&status=completed",
             Arg.Any<CancellationToken>()).Returns(Task.FromResult(JsonResponse("Data/workflowruns_100_page2.json")));
 
         mockHttpClient.GetAsync(
