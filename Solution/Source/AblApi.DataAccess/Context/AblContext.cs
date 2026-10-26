@@ -1,5 +1,6 @@
 ﻿using AblApi.DataAccess.Models;
 using AblApi.DataAccess.Models.GTNH;
+using AblApi.DataAccess.Models.Spotify;
 using AblApi.DataAccess.Models.Willhaben;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,8 @@ namespace AblApi.DataAccess.Context;
 
 public class AblContext(DbContextOptions<AblContext> options) : DbContext(options)
 {
+    public virtual DbSet<SchemaVersion> SchemaVersions { get; set; }
+
     public virtual DbSet<ApiUser> ApiUsers { get; set; }
 
     public virtual DbSet<ApiAccessRoleGrant> ApiAccessRoleGrants { get; set; }
@@ -19,10 +22,22 @@ public class AblContext(DbContextOptions<AblContext> options) : DbContext(option
 
     public virtual DbSet<WillhabenSeenListing> WillhabenSeenListings { get; set; }
 
-    public virtual DbSet<SchemaVersion> SchemaVersions { get; set; }
+    public virtual DbSet<SpotifyUser> SpotifyUsers { get; set; }
+
+    public virtual DbSet<SpotifyPlaylistCache> SpotifyPlaylistCaches { get; set; }
+
+    public virtual DbSet<SpotifyPlaylistCacheTrack> SpotifyPlaylistCacheTracks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<SchemaVersion>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_SchemaVersions_Id");
+
+            entity.Property(e => e.AppliedAt).HasColumnType("datetime");
+            entity.Property(e => e.ScriptName).HasMaxLength(255);
+        });
+
         modelBuilder.Entity<ApiUser>(entity =>
         {
             entity.Property(e => e.Id).ValueGeneratedNever();
@@ -79,12 +94,46 @@ public class AblContext(DbContextOptions<AblContext> options) : DbContext(option
             entity.HasIndex(e => e.Url).IsUnique();
         });
 
-        modelBuilder.Entity<SchemaVersion>(entity =>
+        modelBuilder.Entity<SpotifyUser>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_SchemaVersions_Id");
+            entity.HasKey(e => e.Id);
 
-            entity.Property(e => e.AppliedAt).HasColumnType("datetime");
-            entity.Property(e => e.ScriptName).HasMaxLength(255);
+            entity.Property(e => e.UserIdentifier).HasMaxLength(255);
+            entity.Property(e => e.SpotifyId).HasMaxLength(255);
+            entity.Property(e => e.LinkedAt).HasColumnType("datetime");
+
+            entity.HasIndex(e => e.UserIdentifier).IsUnique();
+            entity.HasIndex(e => e.SpotifyId).IsUnique();
+        });
+
+        modelBuilder.Entity<SpotifyPlaylistCache>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.PlaylistId).HasMaxLength(255);
+            entity.Property(e => e.SnapshotId).HasMaxLength(255);
+
+            entity.HasIndex(e => new { e.SpotifyUserId, e.PlaylistId }).IsUnique();
+
+            entity.HasOne(d => d.SpotifyUser).WithMany(p => p.Playlists)
+                .HasForeignKey(d => d.SpotifyUserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_SpotifyPlaylistCaches_SpotifyUsers");
+        });
+
+        modelBuilder.Entity<SpotifyPlaylistCacheTrack>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.TrackId).HasMaxLength(255);
+            entity.Property(e => e.AddedAt).HasColumnType("datetime");
+
+            entity.HasIndex(e => new { e.PlaylistCacheId, e.TrackId }).IsUnique();
+
+            entity.HasOne(d => d.PlaylistCache).WithMany(p => p.Tracks)
+                .HasForeignKey(d => d.PlaylistCacheId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_SpotifyPlaylistCacheTracks_SpotifyPlaylistCaches");
         });
     }
 }

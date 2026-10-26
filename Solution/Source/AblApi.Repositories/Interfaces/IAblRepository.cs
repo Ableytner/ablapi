@@ -1,4 +1,5 @@
 ﻿using AblApi.Repositories.Interfaces.GTNH;
+using AblApi.Repositories.Interfaces.Spotify;
 using AblApi.Repositories.Interfaces.Willhaben;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -17,6 +18,10 @@ public interface IAblRepository : IDisposable
     IWillhabenConfigRepository WillhabenConfigRepository { get; }
 
     IWillhabenSeenListingRepository WillhabenSeenListingRepository { get; }
+
+    ISpotifyUserRepository SpotifyUserRepository { get; }
+
+    ISpotifyPlaylistCacheRepository SpotifyPlaylistCacheRepository { get; }
 
     Task<IDbContextTransaction> BeginTransactionAsync();
 

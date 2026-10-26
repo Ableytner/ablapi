@@ -1,33 +1,26 @@
 using AblApi.Core.AppSpotify.Domain;
-using AblApi.Core.AppSpotify.Exceptions;
 using SpotifyAPI.Web;
 
 namespace AblApi.Core.AppSpotify;
 
 public class SpotifyService(SpotifyClientFactory clientFactory) : ISpotifyService
 {
+    private const int BatchSize = 100;
+
     private readonly SpotifyClientFactory _clientFactory = clientFactory;
 
-    public async Task<User> GetUserAsync(CancellationToken cancellationToken = default)
+    public async Task<User> GetUserAsync(string user, CancellationToken cancellationToken = default)
     {
-        if (_clientFactory.Instance == null)
-        {
-            throw new UserNotLinkedException();
-        }
-        var client = _clientFactory.Instance;
+        var client = _clientFactory.GetClient(user);
 
         var userDto = await client.UserProfile.Current(cancellationToken);
 
         return User.FromDto(userDto);
     }
 
-    public async Task<Playlist> CreatePlaylist(string name, string description, bool isPublic = false, CancellationToken cancellationToken = default)
+    public async Task<Playlist> CreatePlaylist(string user, string name, string description, bool isPublic, CancellationToken cancellationToken = default)
     {
-        if (_clientFactory.Instance == null)
-        {
-            throw new UserNotLinkedException();
-        }
-        var client = _clientFactory.Instance;
+        var client = _clientFactory.GetClient(user);
 
         var request = new PlaylistCreateRequest(name)
         {
@@ -40,69 +33,52 @@ public class SpotifyService(SpotifyClientFactory clientFactory) : ISpotifyServic
         return Playlist.FromDto(dto);
     }
 
-    public async Task<IEnumerable<Playlist>> GetAllPlaylists(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Playlist>> GetAllPlaylists(string user, CancellationToken cancellationToken = default)
     {
-        if (_clientFactory.Instance == null)
-        {
-            throw new UserNotLinkedException();
-        }
-        var client = _clientFactory.Instance;
+        var client = _clientFactory.GetClient(user);
 
         var paging = await client.Playlists.CurrentUsers(cancellationToken);
         var playlistsDto = await client.PaginateAll(paging, cancellationToken: cancellationToken);
 
-        var user = await GetUserAsync(cancellationToken);
+        var spotifyUser = await GetUserAsync(user, cancellationToken);
 
         var playlists = playlistsDto.Select(Playlist.FromDto)
-                                    .Where(p => p.OwnerId == user.Id);
+                                    .Where(p => p.OwnerId == spotifyUser.Id);
 
         return playlists;
     }
 
-    public async Task<Playlist> GetPlaylist(string id, CancellationToken cancellationToken = default)
+    public async Task<Playlist> GetPlaylist(string user, string id, CancellationToken cancellationToken = default)
     {
-        if (_clientFactory.Instance == null)
-        {
-            throw new UserNotLinkedException();
-        }
-        var client = _clientFactory.Instance;
+        var client = _clientFactory.GetClient(user);
 
         var playlistDto = await client.Playlists.Get(id, cancellationToken);
 
         return Playlist.FromDto(playlistDto);
     }
 
-    public async Task<int> GetLikedSongsCount(CancellationToken cancellationToken = default)
+    public async Task<int> GetLikedSongsCount(string user, CancellationToken cancellationToken = default)
     {
-        if (_clientFactory.Instance == null)
-        {
-            throw new UserNotLinkedException();
-        }
-        var client = _clientFactory.Instance;
+        var client = _clientFactory.GetClient(user);
 
         var playlistDto = await client.Library.GetTracks(cancellationToken);
 
         return playlistDto.Total.Value;
     }
 
-    public async Task DeletePlaylist(string uri, CancellationToken cancellationToken)
+    public async Task DeletePlaylist(string user, string id, CancellationToken cancellationToken)
     {
-        if (_clientFactory.Instance == null)
-        {
-            throw new UserNotLinkedException();
-        }
-        var client = _clientFactory.Instance;
+        var client = _clientFactory.GetClient(user);
 
-        await client.Library.RemoveItems(new LibraryRemoveItemsRequest([uri]), cancellationToken);
+        // Spotify's docs point to DELETE /me/library, which the library cannot call correctly for playlists
+        #pragma warning disable CS0618
+        await client.Follow.UnfollowPlaylist(id, cancellationToken);
+        #pragma warning restore CS0618
     }
 
-    public async Task<IEnumerable<PlaylistTrack>> GetPlaylistTracks(string id, CancellationToken cancellationToken)
+    public async Task<IEnumerable<PlaylistTrack>> GetPlaylistTracks(string user, string id, CancellationToken cancellationToken)
     {
-        if (_clientFactory.Instance == null)
-        {
-            throw new UserNotLinkedException();
-        }
-        var client = _clientFactory.Instance;
+        var client = _clientFactory.GetClient(user);
 
         var paging = await client.Playlists.GetPlaylistItems(id, cancellationToken);
 
@@ -111,13 +87,9 @@ public class SpotifyService(SpotifyClientFactory clientFactory) : ISpotifyServic
         return dtos.Select(PlaylistTrack.FromDto);
     }
 
-    public async Task<IEnumerable<PlaylistTrack>> GetLikedSongsTracks(CancellationToken cancellationToken)
+    public async Task<IEnumerable<PlaylistTrack>> GetLikedSongsTracks(string user, CancellationToken cancellationToken)
     {
-        if (_clientFactory.Instance == null)
-        {
-            throw new UserNotLinkedException();
-        }
-        var client = _clientFactory.Instance;
+        var client = _clientFactory.GetClient(user);
 
         var paging = await client.Library.GetTracks(cancellationToken);
 
@@ -126,30 +98,28 @@ public class SpotifyService(SpotifyClientFactory clientFactory) : ISpotifyServic
         return dtos.Select(PlaylistTrack.FromDto);
     }
 
-    public async Task AddTracks(string id, IEnumerable<string> uris, CancellationToken cancellationToken)
+    public async Task AddTracks(string user, string id, IEnumerable<string> uris, CancellationToken cancellationToken)
     {
-        if (_clientFactory.Instance == null)
-        {
-            throw new UserNotLinkedException();
-        }
-        var client = _clientFactory.Instance;
+        var client = _clientFactory.GetClient(user);
 
-        await client.Playlists.AddPlaylistItems(id, new PlaylistAddItemsRequest(uris.ToList()), cancellationToken);
+        foreach (var chunk in uris.ToList().Chunk(BatchSize))
+        {
+            await client.Playlists.AddPlaylistItems(id, new PlaylistAddItemsRequest(chunk.ToList()), cancellationToken);
+        }
     }
 
-    public async Task RemoveTracks(string id, IEnumerable<string> uris, CancellationToken cancellationToken)
+    public async Task RemoveTracks(string user, string id, IEnumerable<string> uris, CancellationToken cancellationToken)
     {
-        if (_clientFactory.Instance == null)
+        var client = _clientFactory.GetClient(user);
+
+        foreach (var chunk in uris.ToList().Chunk(BatchSize))
         {
-            throw new UserNotLinkedException();
+            var request = new PlaylistRemoveItemsRequestV2()
+            {
+                Items = chunk.Select(u => new PlaylistRemoveItemsRequestV2.Item() { Uri = u }).ToList()
+            };
+
+            await client.Playlists.RemovePlaylistItems(id, request, cancellationToken);
         }
-        var client = _clientFactory.Instance;
-
-        var request = new PlaylistRemoveItemsRequest()
-        {
-            Tracks = uris.Select(u => new PlaylistRemoveItemsRequest.Item() { Uri = u }).ToList()
-        };
-
-        await client.Playlists.RemovePlaylistItems(id, request, cancellationToken);
     }
 }
