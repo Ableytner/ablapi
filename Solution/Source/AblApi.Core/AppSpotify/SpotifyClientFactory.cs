@@ -1,18 +1,39 @@
 using AblApi.Common.Utilities;
+using AblApi.Core.AppSpotify.Exceptions;
+using AblApi.DataAccess.Models.Spotify;
+using AblApi.Repositories.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using SpotifyAPI.Web;
+using System.Collections.Concurrent;
 
 namespace AblApi.Core.AppSpotify;
 
-public class SpotifyClientFactory(SpotifyAppSettings appSettings)
+public class SpotifyClientFactory(SpotifyAppSettings appSettings, IServiceScopeFactory scopeFactory)
 {
+    private const int AccessTokenLifetimeSeconds = 3600;
+
     private readonly SpotifyAppSettings _appSettings = appSettings;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-    private SpotifyClient? _instance = null;
-    private DateTime? _requestCreatedAt = null;
+    private readonly ConcurrentDictionary<string, SpotifyClient> _clients = new();
+    private readonly ConcurrentDictionary<string, DateTime> _requestCreatedAt = new();
 
-    public SpotifyClient? Instance { get => _instance; }
+    public bool HasClient(string user)
+    {
+        return _clients.ContainsKey(user);
+    }
 
-    public async Task<string> GetAuthUrl()
+    public SpotifyClient GetClient(string user)
+    {
+        if (!_clients.TryGetValue(user, out var client))
+        {
+            throw new UserNotLinkedException($"No linked Spotify account for user '{user}'.");
+        }
+
+        return client;
+    }
+
+    public async Task<string> GetAuthUrl(string user)
     {
         var loginRequest = new LoginRequest(
             GetCallbackUri(),
@@ -20,6 +41,7 @@ public class SpotifyClientFactory(SpotifyAppSettings appSettings)
             LoginRequest.ResponseType.Code
         )
         {
+            State = user,
             Scope = [
                 Scopes.PlaylistReadPrivate,
                 Scopes.PlaylistReadCollaborative,
@@ -29,20 +51,20 @@ public class SpotifyClientFactory(SpotifyAppSettings appSettings)
             ]
         };
 
-        _requestCreatedAt = DateTime.Now;
+        _requestCreatedAt[user] = DateTime.UtcNow;
 
         return loginRequest.ToUri().AbsoluteUri;
     }
 
-    public async Task<bool> Build(string code)
+    public async Task<bool> Build(string code, string user)
     {
-        if (_requestCreatedAt is null)
+        if (!_requestCreatedAt.TryGetValue(user, out var requestCreatedAt))
         {
             return false;
         }
-        if ((DateTime.Now - _requestCreatedAt.Value).TotalMinutes > 15)
+        if ((DateTime.UtcNow - requestCreatedAt).TotalMinutes > 15)
         {
-            _requestCreatedAt = null;
+            _requestCreatedAt.TryRemove(user, out _);
             return false;
         }
 
@@ -50,13 +72,56 @@ public class SpotifyClientFactory(SpotifyAppSettings appSettings)
             new AuthorizationCodeTokenRequest(_appSettings.ClientId, _appSettings.ClientSecret, code, GetCallbackUri())
         );
 
-        var config = SpotifyClientConfig
-                    .CreateDefault()
-                    .WithAuthenticator(new AuthorizationCodeAuthenticator(_appSettings.ClientId, _appSettings.ClientSecret, response));
-        _instance = new SpotifyClient(config);
+        var client = CreateClient(response);
+        _clients[user] = client;
+        _requestCreatedAt.TryRemove(user, out _);
 
-        _requestCreatedAt = null;
+        var spotifyUserDto = await client.UserProfile.Current();
+        var spotifyUser = new SpotifyUser
+        {
+            UserIdentifier = user,
+            SpotifyId = spotifyUserDto.Id,
+            AccessToken = response.AccessToken,
+            RefreshToken = response.RefreshToken ?? string.Empty,
+            LinkedAt = DateTime.UtcNow,
+        };
+
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IAblRepository>();
+        await repository.SpotifyUserRepository.UpsertAsync(spotifyUser);
+
         return true;
+    }
+
+    // Rebuilds all clients from the stored links, so they survive an app restart.
+    public async Task RestoreAsync()
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IAblRepository>();
+        var users = await repository.SpotifyUserRepository.GetAllAsListAsync();
+
+        foreach (var linkedUser in users)
+        {
+            var token = new AuthorizationCodeTokenResponse
+            {
+                AccessToken = linkedUser.AccessToken,
+                TokenType = "Bearer",
+                ExpiresIn = AccessTokenLifetimeSeconds,
+                RefreshToken = linkedUser.RefreshToken,
+                CreatedAt = linkedUser.LinkedAt,
+            };
+
+            _clients[linkedUser.UserIdentifier] = CreateClient(token);
+        }
+    }
+
+    private SpotifyClient CreateClient(AuthorizationCodeTokenResponse token)
+    {
+        var config = SpotifyClientConfig
+            .CreateDefault()
+            .WithAuthenticator(new AuthorizationCodeAuthenticator(_appSettings.ClientId, _appSettings.ClientSecret, token));
+
+        return new SpotifyClient(config);
     }
 
     private static Uri GetCallbackUri()

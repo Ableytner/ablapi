@@ -15,15 +15,15 @@ public class SpotifyController(SpotifyClientFactory spotifyClientFactory) : Cont
     [AccessLevel(AccessLevelType.PublicInternetAccess)]
     [EndpointSummary("Start authenticating with Spotify")]
     [ProducesResponseType(StatusCodes.Status302Found)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult> BeginOAuth()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> BeginOAuth([FromQuery] string user)
     {
-        if (_spotifyClientFactory.Instance != null)
+        if (_spotifyClientFactory.HasClient(user))
         {
-            return Forbid();
+            return Content($"The user '{user}' already has a linked Spotify account.");
         }
 
-        var redirectUrl = await _spotifyClientFactory.GetAuthUrl();
+        var redirectUrl = await _spotifyClientFactory.GetAuthUrl(user);
 
         return Redirect(redirectUrl);
     }
@@ -32,15 +32,15 @@ public class SpotifyController(SpotifyClientFactory spotifyClientFactory) : Cont
     [AccessLevel(AccessLevelType.PublicInternetAccess)]
     [EndpointSummary("Finish authenticating with Spotify")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult> CompleteOAuth([FromQuery] string code)
+    public async Task<ActionResult> CompleteOAuth([FromQuery] string code, [FromQuery] string state)
     {
-        if (_spotifyClientFactory.Instance != null)
+        // state is the user identifier previously sent, echoed back by Spotify
+        if (_spotifyClientFactory.HasClient(state))
         {
-            return Forbid();
+            return Content($"The user '{state}' already has a linked Spotify account.");
         }
 
-        if (!await _spotifyClientFactory.Build(code))
+        if (!await _spotifyClientFactory.Build(code, state))
         {
             return Forbid();
         }

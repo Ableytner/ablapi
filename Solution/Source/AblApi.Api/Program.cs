@@ -2,12 +2,13 @@ using AblApi.Api.ExceptionHandling;
 using AblApi.Api.Startup;
 using AblApi.Common.Extensions;
 using AblApi.Common.Utilities;
+using AblApi.Core.AppSpotify;
 
 namespace AblApi.Api;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,9 @@ public class Program
         builder.Services.AddRateLimiting();
 
         var app = builder.Build();
+
+        var spotifyClientFactory = app.Services.GetRequiredService<SpotifyClientFactory>();
+        await spotifyClientFactory.RestoreAsync();
 
         // Unhandled exceptions in Development environment reply with a detailed error json response
         app.UseExceptionHandler();

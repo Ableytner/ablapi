@@ -19,13 +19,16 @@ public abstract class TestBase : IAsyncLifetime
         string databaseName = $"TestBaseDb_{Guid.NewGuid():N}";
 
         _sharedFactory = CreateTestApiFactory(databaseName);
+
+        var ablContext = DbContextMocker.GetSqliteContextInMemory(databaseName);
+
         _sharedClient = _sharedFactory.CreateClient();
 
         TestHelpers = new()
         {
             ApiFactory = _sharedFactory,
             Client = _sharedClient,
-            AblContext = DbContextMocker.GetSqliteContextInMemory(databaseName),
+            AblContext = ablContext,
         };
     }
 
