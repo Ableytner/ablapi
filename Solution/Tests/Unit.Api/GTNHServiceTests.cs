@@ -5,6 +5,7 @@ using AblApi.GTNH.Dtos;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Tests.Unit.Api;
 
@@ -88,6 +89,51 @@ public class GTNHServiceTests
     {
         var method = typeof(GTNHService).GetMethod("MapWorkflowRunToDailyVersionDto", BindingFlags.NonPublic | BindingFlags.Instance)!;
         return (Task<DailyVersionDto>)method.Invoke(service, [workflowRun])!;
+    }
+
+    [Theory]
+    [InlineData("gtnh-web-map-1.0.jar", "1.0")]
+    [InlineData("gtnh-web-map-1.0.0.jar", "1.0.0")]
+    [InlineData("gtnh-web-map-1.0-beta-1.jar", "1.0-beta-1")]
+    [InlineData("gtnh-web-map-1.0.0-alpha-2.jar", "1.0.0-alpha-2")]
+    [InlineData("gtnh-web-map-12.34.jar", "12.34")]
+    [InlineData("gtnh-web-map-1.0.0-rc-100.jar", "1.0.0-rc-100")]
+    public void WebMapVersionRegex_MatchesValidNames_CapturesVersion(string name, string expectedVersion)
+    {
+        // Arrange
+        var regex = GetWebMapVersionRegex();
+
+        // Act
+        var match = regex.Match(name);
+
+        // Assert
+        Assert.True(match.Success);
+        Assert.Equal(expectedVersion, match.Groups[1].Value);
+    }
+
+    [Theory]
+    [InlineData("gtnh-web-map-1.0.zip")]
+    [InlineData("gtnh-web-map-1.0")]
+    [InlineData("gtnh-web-map-1.jar")]
+    [InlineData("gtnh-web-map-1.0.0.0.jar")]
+    [InlineData("web-map-1.0.jar")]
+    [InlineData("gtnh-web-map-1.0-.jar")]
+    public void WebMapVersionRegex_RejectsInvalidNames(string name)
+    {
+        // Arrange
+        var regex = GetWebMapVersionRegex();
+
+        // Act
+        var match = regex.Match(name);
+
+        // Assert
+        Assert.False(match.Success);
+    }
+
+    private static Regex GetWebMapVersionRegex()
+    {
+        var field = typeof(GTNHService).GetField("WebMapVersionRegex", BindingFlags.NonPublic | BindingFlags.Static)!;
+        return (Regex)field.GetValue(null)!;
     }
 
     private static WorkflowArtifactDto CreateArtifact(string name, string archiveDownloadUrl)

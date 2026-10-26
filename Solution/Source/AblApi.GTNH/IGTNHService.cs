@@ -15,4 +15,6 @@ public interface IGTNHService
     public Task<StableVersionDto> GetLatestStableVersionAsync(CancellationToken cancellationToken = default);
 
     public Task<StableVersionDto?> GetSpecificStableVersionAsync(string version, CancellationToken cancellationToken = default);
+
+    public Task<WebMapDto?> GetLatestWebMapReleaseAsync(CancellationToken cancellationToken = default);
 }

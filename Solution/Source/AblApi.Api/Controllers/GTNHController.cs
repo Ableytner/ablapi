@@ -103,4 +103,32 @@ public class GTNHController(IGTNHService gtnhService, IMemoryCache cache, GTNHAp
         }
         return Ok(stableVersionDto);
     }
+
+    [HttpGet("webmap/latest")]
+    [AccessLevel(AccessLevelType.PublicInternetAccess)]
+    [EndpointSummary("Get the latest GTNH web map download URL")]
+    [ProducesResponseType(typeof(WebMapDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<WebMapDto>> GetLatestWebMapRelease()
+    {
+        var cacheKey = "gtnh:webmap:latest";
+
+        if (_isCachingEnabled && _cache.TryGetValue(cacheKey, out WebMapDto? cachedDto))
+        {
+            return Ok(cachedDto);
+        }
+
+        var webMapDto = await _gtnhService.GetLatestWebMapReleaseAsync();
+
+        if (webMapDto == null)
+        {
+            return NotFound();
+        }
+
+        if (_isCachingEnabled)
+        {
+            _cache.Set(cacheKey, webMapDto, new MemoryCacheEntryOptions { SlidingExpiration = _cacheExpiration });
+        }
+        return Ok(webMapDto);
+    }
 }

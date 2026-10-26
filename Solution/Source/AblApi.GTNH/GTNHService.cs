@@ -1,4 +1,5 @@
-﻿using AblApi.Core.AppGithub;
+﻿using System.Text.RegularExpressions;
+using AblApi.Core.AppGithub;
 using AblApi.Core.AppGithub.Dtos;
 using AblApi.GTNH.DailyVersionSchemas;
 using AblApi.GTNH.Dtos;
@@ -201,4 +202,39 @@ public class GTNHService(ILogger<GTNHService> logger, GTNHAppSettings gtnhConfig
 
         throw new InvalidOperationException($"No schema found for workflow run number {workflowRunNumber}, a new one needs to be added!");
     }
+
+    public async Task<WebMapDto?> GetLatestWebMapReleaseAsync(CancellationToken cancellationToken = default)
+    {
+        var release = await _githubService.GetLatestReleaseAsync(
+            _gtnhConfiguration.WebMapRepoOwner,
+            _gtnhConfiguration.WebMapRepoName,
+            cancellationToken);
+
+        if (release == null)
+        {
+            _logger.LogWarning("No latest release found for {Repo}", _gtnhConfiguration.WebMapRepoName);
+            return null;
+        }
+
+        foreach (var asset in release.Assets)
+        {
+            if (WebMapVersionRegex.IsMatch(asset.Name))
+            {
+                var version = WebMapVersionRegex.Replace(asset.Name, "$1");
+                _logger.LogInformation("Found web map asset: {Name} -> {Url} (v{Version})", asset.Name, asset.BrowserDownloadUrl, version);
+                return new WebMapDto
+                {
+                    Version = version,
+                    DownloadUrl = asset.BrowserDownloadUrl
+                };
+            }
+        }
+
+        _logger.LogWarning("No matching web map JAR found in latest release of {Repo}", _gtnhConfiguration.WebMapRepoName);
+        return null;
+    }
+
+    private static readonly Regex WebMapVersionRegex = new(
+        @"^gtnh-web-map-([0-9]+\.[0-9]+(?:\.[0-9]+)?(?:-[a-zA-Z]+-\d+)?)\.jar$",
+        RegexOptions.Compiled);
 }
