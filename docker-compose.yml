@@ -10,4 +10,6 @@ services:
       Database__Connection: "${DB_CONNECTION_STRING}"
       JwtConfig__Key: "${JWT_KEY}"
       GithubConfig__Token: "${GITHUB_TOKEN}"
+      SpotifyConfig__ClientId: "${SPOTIFY_CLIENT_ID}"
+      SpotifyConfig__ClientSecret: "${SPOTIFY_CLIENT_SECRET}"
     restart: unless-stopped
