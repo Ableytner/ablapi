@@ -1,4 +1,5 @@
 using AblApi.Core.AppSpotify.Exceptions;
+using AblApi.DataAccess.Models.Spotify;
 using SpotifyAPI.Web;
 
 namespace AblApi.Core.AppSpotify.Domain;
@@ -34,6 +35,18 @@ public class PlaylistTrack : Track
             Artists = dto.Artists.Select(x => x.Name).ToArray(),
             IsLocal = dto.IsLocal,
             AddedAt = dtoRaw.AddedAt
+        };
+    }
+
+    public static PlaylistTrack FromDbo(SpotifyPlaylistCacheTrack dbo)
+    {
+        return new PlaylistTrack()
+        {
+            Id = dbo.TrackId,
+            Name = string.Empty,
+            Artists = [],
+            IsLocal = false,
+            AddedAt = dbo.AddedAt
         };
     }
 }

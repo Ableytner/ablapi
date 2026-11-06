@@ -9,6 +9,7 @@ CREATE TABLE "SpotifyUsers" (
     "AccessToken" text NOT NULL,
     "RefreshToken" text NOT NULL,
     "LinkedAt" timestamp NOT NULL,
+    "AllPlaylistId" varchar(255) NULL,
     CONSTRAINT "PK_SpotifyUsers" PRIMARY KEY ("Id"),
     CONSTRAINT "UQ_SpotifyUsers_UserIdentifier" UNIQUE ("UserIdentifier"),
     CONSTRAINT "UQ_SpotifyUsers_SpotifyId" UNIQUE ("SpotifyId")

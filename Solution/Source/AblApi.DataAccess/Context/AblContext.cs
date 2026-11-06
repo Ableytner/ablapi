@@ -101,6 +101,7 @@ public class AblContext(DbContextOptions<AblContext> options) : DbContext(option
             entity.Property(e => e.UserIdentifier).HasMaxLength(255);
             entity.Property(e => e.SpotifyId).HasMaxLength(255);
             entity.Property(e => e.LinkedAt).HasColumnType("datetime");
+            entity.Property(e => e.AllPlaylistId).HasMaxLength(255);
 
             entity.HasIndex(e => e.UserIdentifier).IsUnique();
             entity.HasIndex(e => e.SpotifyId).IsUnique();

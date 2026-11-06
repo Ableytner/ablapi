@@ -23,4 +23,6 @@ public interface ISpotifyService
     public Task AddTracks(string user, string id, IEnumerable<string> uris, CancellationToken cancellationToken);
 
     public Task RemoveTracks(string user, string id, IEnumerable<string> uris, CancellationToken cancellationToken);
+
+    public Task<Playlist> CreateAllPlaylistAsync(string user, CancellationToken cancellationToken = default);
 }
