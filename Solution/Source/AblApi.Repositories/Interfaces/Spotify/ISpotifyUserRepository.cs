@@ -9,4 +9,6 @@ public interface ISpotifyUserRepository : IGenericRepository<SpotifyUser>
     Task UpsertAsync(SpotifyUser entity);
 
     Task RemoveByUserIdentifierAsync(string userIdentifier);
+
+    Task SetAllPlaylistIdAsync(string userIdentifier, string allPlaylistId);
 }

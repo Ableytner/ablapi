@@ -14,5 +14,7 @@ public class SpotifyUser
 
     public DateTime LinkedAt { get; set; }
 
+    public string? AllPlaylistId { get; set; }
+
     public virtual ICollection<SpotifyPlaylistCache> Playlists { get; set; } = new List<SpotifyPlaylistCache>();
 }

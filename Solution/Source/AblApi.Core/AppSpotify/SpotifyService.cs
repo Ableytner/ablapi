@@ -1,13 +1,17 @@
 using AblApi.Core.AppSpotify.Domain;
+using AblApi.Repositories.Interfaces;
+using AblApi.Repositories.Interfaces.Spotify;
 using SpotifyAPI.Web;
 
 namespace AblApi.Core.AppSpotify;
 
-public class SpotifyService(SpotifyClientFactory clientFactory) : ISpotifyService
+public class SpotifyService(SpotifyClientFactory clientFactory, IAblRepository ablRepository, SpotifyAppSettings appSettings) : ISpotifyService
 {
     private const int BatchSize = 100;
 
     private readonly SpotifyClientFactory _clientFactory = clientFactory;
+    private readonly IAblRepository _ablRepository = ablRepository;
+    private readonly SpotifyAppSettings _appSettings = appSettings;
 
     public async Task<User> GetUserAsync(string user, CancellationToken cancellationToken = default)
     {
@@ -78,6 +82,11 @@ public class SpotifyService(SpotifyClientFactory clientFactory) : ISpotifyServic
 
     public async Task<IEnumerable<PlaylistTrack>> GetPlaylistTracks(string user, string id, CancellationToken cancellationToken)
     {
+        if (id == ISpotifyPlaylistCacheRepository.LikedSongsPlaylistId)
+        {
+            return await GetLikedSongsTracks(user, cancellationToken);
+        }
+
         var client = _clientFactory.GetClient(user);
 
         var paging = await client.Playlists.GetPlaylistItems(id, cancellationToken);
@@ -121,5 +130,19 @@ public class SpotifyService(SpotifyClientFactory clientFactory) : ISpotifyServic
 
             await client.Playlists.RemovePlaylistItems(id, request, cancellationToken);
         }
+    }
+
+    public async Task<Playlist> CreateAllPlaylistAsync(string user, CancellationToken cancellationToken = default)
+    {
+        var playlist = await CreatePlaylist(
+            user,
+            _appSettings.AllPlaylistName,
+            "Playlist with all songs from all your playlists, created by github.com/Ableytner/ablapi",
+            false,
+            cancellationToken);
+
+        await _ablRepository.SpotifyUserRepository.SetAllPlaylistIdAsync(user, playlist.Id);
+
+        return playlist;
     }
 }

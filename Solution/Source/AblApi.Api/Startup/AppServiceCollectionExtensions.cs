@@ -73,6 +73,7 @@ internal static class AppServiceCollectionExtensions
 
         services.AddSingleton<SpotifyClientFactory>();
         services.AddTransient<ISpotifyService, SpotifyService>();
+        services.AddTransient<IAllPlaylistService, AllPlaylistService>();
     }
 
     private static void AddBackgroundServices(IServiceCollection services, IConfiguration config)
@@ -81,6 +82,7 @@ internal static class AppServiceCollectionExtensions
         {
             services.AddHostedService<GTNHBackgroundService>();
             services.AddHostedService<WillhabenBackgroundService>();
+            services.AddHostedService<SpotifyBackgroundService>();
         }
 
         if (EnvironmentHelper.IsDevelopment())

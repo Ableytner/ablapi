@@ -93,7 +93,7 @@ public class SpotifyClientFactory(SpotifyAppSettings appSettings, IServiceScopeF
         return true;
     }
 
-    // Rebuilds all clients from the stored links, so they survive an app restart.
+    // rebuilds all clients from the stored links, so they survive an app restart
     public async Task RestoreAsync()
     {
         await using var scope = _scopeFactory.CreateAsyncScope();

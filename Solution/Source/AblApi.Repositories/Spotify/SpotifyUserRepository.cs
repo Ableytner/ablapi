@@ -45,4 +45,19 @@ public class SpotifyUserRepository(AblContext context) : GenericRepository<Spoti
 
         await Context.SaveChangesAsync();
     }
+
+    public async Task SetAllPlaylistIdAsync(string userIdentifier, string allPlaylistId)
+    {
+        var entity = await Context.SpotifyUsers
+            .FirstOrDefaultAsync(u => u.UserIdentifier == userIdentifier);
+
+        if (entity == null)
+        {
+            return;
+        }
+
+        entity.AllPlaylistId = allPlaylistId;
+
+        await Context.SaveChangesAsync();
+    }
 }
