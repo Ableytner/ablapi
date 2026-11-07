@@ -123,9 +123,9 @@ public class SpotifyService(SpotifyClientFactory clientFactory, IAblRepository a
 
         foreach (var chunk in uris.ToList().Chunk(BatchSize))
         {
-            var request = new PlaylistRemoveItemsRequestV2()
+            var request = new PlaylistRemoveItemsRequest()
             {
-                Items = chunk.Select(u => new PlaylistRemoveItemsRequestV2.Item() { Uri = u }).ToList()
+                Tracks = chunk.Select(u => new PlaylistRemoveItemsRequest.Item() { Uri = u }).ToList()
             };
 
             await client.Playlists.RemovePlaylistItems(id, request, cancellationToken);
