@@ -2,7 +2,9 @@
 using AblApi.Repositories.GTNH;
 using AblApi.Repositories.Interfaces;
 using AblApi.Repositories.Interfaces.GTNH;
+using AblApi.Repositories.Interfaces.Spotify;
 using AblApi.Repositories.Interfaces.Willhaben;
+using AblApi.Repositories.Spotify;
 using AblApi.Repositories.Willhaben;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -20,6 +22,8 @@ public class AblRepository : IAblRepository
         GTNHDailyVersionRepository = new DailyVersionRepository(Context);
         WillhabenConfigRepository = new WillhabenConfigRepository(Context);
         WillhabenSeenListingRepository = new WillhabenSeenListingRepository(Context);
+        SpotifyUserRepository = new SpotifyUserRepository(Context);
+        SpotifyPlaylistCacheRepository = new SpotifyPlaylistCacheRepository(Context);
     }
 
     public readonly AblContext Context;
@@ -35,6 +39,10 @@ public class AblRepository : IAblRepository
     public IWillhabenConfigRepository WillhabenConfigRepository { get; }
 
     public IWillhabenSeenListingRepository WillhabenSeenListingRepository { get; }
+
+    public ISpotifyUserRepository SpotifyUserRepository { get; }
+
+    public ISpotifyPlaylistCacheRepository SpotifyPlaylistCacheRepository { get; }
 
     public async Task<IDbContextTransaction> BeginTransactionAsync()
     {

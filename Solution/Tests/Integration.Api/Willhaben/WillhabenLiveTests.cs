@@ -3,9 +3,9 @@ using AblApi.Core.AppWillhaben;
 using AblApi.Core.AppWillhaben.Dtos;
 using AblApi.Core.AppWillhaben.Extensions;
 
-namespace Integration.Api;
+namespace Integration.Api.Willhaben;
 
-public class WillhabenIntegrationLiveTests
+public class WillhabenLiveTests
 {
 //    [Fact]
     [Fact(Skip = "Live API test")]

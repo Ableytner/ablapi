@@ -5,7 +5,7 @@ using Integration.Api.Fixture;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Integration.Api;
+namespace Integration.Api.Willhaben;
 
 public class WillhabenServiceTests : TestBase
 {
