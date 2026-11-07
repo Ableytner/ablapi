@@ -1,4 +1,5 @@
 using AblApi.Core.AppSpotify.Domain;
+using AblApi.Core.AppSpotify.Exceptions;
 using AblApi.DataAccess.Models.Spotify;
 using AblApi.Repositories.Interfaces;
 using AblApi.Repositories.Interfaces.Spotify;
@@ -139,6 +140,23 @@ public class AllPlaylistService(ISpotifyService spotify, IAblRepository ablRepos
         _logger.LogInformation(
             "all_playlist for user {User} updated: removed {Removed}, added {Added}.",
             user, toRemove.Count, toAdd.Count);
+    }
+
+    public async Task<Playlist> RegisterAsync(string user, CancellationToken cancellationToken = default)
+    {
+        var spotifyUser = await _ablRepository.SpotifyUserRepository.GetByUserIdentifierAsync(user);
+        if (spotifyUser == null)
+        {
+            throw new UserNotLinkedException($"No linked Spotify account for user '{user}'.");
+        }
+
+        var playlist = string.IsNullOrEmpty(spotifyUser.AllPlaylistId)
+            ? await _spotify.CreateAllPlaylistAsync(user, cancellationToken)
+            : await _spotify.GetPlaylist(user, spotifyUser.AllPlaylistId, cancellationToken);
+
+        await UpdateAsync(user, cancellationToken);
+
+        return await _spotify.GetPlaylist(user, playlist.Id, cancellationToken);
     }
 
     private static async Task<bool> LoadCachedTracksAsync(

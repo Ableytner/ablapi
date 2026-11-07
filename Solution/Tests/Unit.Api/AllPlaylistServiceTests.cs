@@ -1,5 +1,6 @@
 using AblApi.Core.AppSpotify;
 using AblApi.Core.AppSpotify.Domain;
+using AblApi.Core.AppSpotify.Exceptions;
 using AblApi.DataAccess.Models.Spotify;
 using AblApi.Repositories.Interfaces;
 using AblApi.Repositories.Interfaces.Spotify;
@@ -234,6 +235,66 @@ public class AllPlaylistServiceTests(InMemorySqliteDbFixture fixture) : IClassFi
         await _spotify.DidNotReceiveWithAnyArgs().RemoveTracks(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<IEnumerable<string>>(), Arg.Any<CancellationToken>());
         string[] expected_tracks = ["spotify:track:t5"];
         await _spotify.Received(1).AddTracks(user, "all1", Arg.Is<IEnumerable<string>>(x => x.SequenceEqual(expected_tracks)), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RegisterAsync_UserNotFound_ThrowsUserNotLinked()
+    {
+        // Arrange: no SpotifyUser row for this identifier
+        var service = CreateService();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UserNotLinkedException>(
+            () => service.RegisterAsync("unlinked-user", TestContext.Current.CancellationToken));
+
+        await _spotify.DidNotReceiveWithAnyArgs().CreateAllPlaylistAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RegisterAsync_NoAllPlaylistId_CreatesPlaylist()
+    {
+        const string user = "register-new";
+
+        // Arrange: linked user without an all_playlist yet
+        await SeedUser(user, allPlaylistId: null);
+
+        var created = Playlist(user, "all-new", null);
+        _spotify.CreateAllPlaylistAsync(user, Arg.Any<CancellationToken>()).Returns(created);
+        _spotify.GetPlaylist(user, "all-new", Arg.Any<CancellationToken>()).Returns(created);
+
+        var service = CreateService();
+
+        // Act
+        var result = await service.RegisterAsync(user, TestContext.Current.CancellationToken);
+
+        // Assert: the playlist was created and returned
+        await _spotify.Received(1).CreateAllPlaylistAsync(user, Arg.Any<CancellationToken>());
+        Assert.Same(created, result);
+    }
+
+    [Fact]
+    public async Task RegisterAsync_ExistingAllPlaylistId_DoesNotCreate()
+    {
+        const string user = "register-existing";
+
+        // Arrange: linked user whose all_playlist is fully cached, so UpdateAsync early-exits
+        await SeedUser(user, allPlaylistId: "all1");
+        await SeedCache(user, ISpotifyPlaylistCacheRepository.LikedSongsPlaylistId, null, [Track("t1", 1)]);
+        await SeedCache(user, "all1", null, [Track("t1", 1)]);
+
+        _spotify.GetAllPlaylists(user, Arg.Any<CancellationToken>()).Returns([]);
+        _spotify.GetLikedSongsCount(user, Arg.Any<CancellationToken>()).Returns(1);
+        _spotify.GetPlaylist(user, "all1", Arg.Any<CancellationToken>())
+            .Returns(Playlist(user, "all1", null, trackCount: 1), Playlist(user, "all1", null, trackCount: 1));
+
+        var service = CreateService();
+
+        // Act
+        var result = await service.RegisterAsync(user, TestContext.Current.CancellationToken);
+
+        // Assert: no new playlist was created
+        await _spotify.DidNotReceiveWithAnyArgs().CreateAllPlaylistAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+        Assert.Equal("all1", result.Id);
     }
 
     // ------------------------------------------------------------------------
