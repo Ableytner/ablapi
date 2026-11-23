@@ -175,7 +175,8 @@ public class GithubServiceTests : TestBase
         Assert.Equal(200, result.Count);
     }
 
-    [Fact]
+//    [Fact]
+    [Fact(Skip = "Live API test")]
     public async Task GetWorkflowArtifactsAsync_ReturnsArtifacts()
     {
         // Arrange
