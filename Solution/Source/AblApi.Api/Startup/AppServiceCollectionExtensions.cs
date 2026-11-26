@@ -1,6 +1,7 @@
 using AblApi.Api.DebugUtil;
 using AblApi.Common.Utilities;
 using AblApi.Core.AppGithub;
+using AblApi.Core.AppK8s;
 using AblApi.Core.AppNikoBot;
 using AblApi.Core.AppWillhaben;
 using AblApi.GTNH;
@@ -35,6 +36,10 @@ internal static class AppServiceCollectionExtensions
         config.GetSection(GTNHAppSettings.SectionName).Bind(gtnhConfig);
         services.AddSingleton(gtnhConfig);
 
+        var k8sConfig = new K8sAppSettings();
+        config.GetSection(K8sAppSettings.SectionName).Bind(k8sConfig);
+        services.AddSingleton(k8sConfig);
+
         var nikobotConfig = new NikoBotAppSettings();
         config.GetSection(NikoBotAppSettings.SectionName).Bind(nikobotConfig);
         if (string.IsNullOrEmpty(nikobotConfig.BaseUrl) || string.IsNullOrEmpty(nikobotConfig.ApiSecret))
@@ -51,6 +56,9 @@ internal static class AppServiceCollectionExtensions
 
         services.AddTransient<IGTNewHorizonsService, GTNewHorizonsService>();
         services.AddTransient<IGTNHService, GTNHService>();
+
+        services.AddSingleton<IK8sHttpClient, K8sHttpClient>();
+        services.AddTransient<IK8sService, K8sService>();
 
         services.AddTransient<INikoBotService, NikoBotService>();
 

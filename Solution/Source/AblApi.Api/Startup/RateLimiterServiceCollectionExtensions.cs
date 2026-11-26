@@ -30,6 +30,21 @@ internal static class RateLimiterServiceCollectionExtensions
                     PermitLimit = 10
                 });
             });
+
+            options.AddPolicy("deploy", httpContext =>
+            {
+                if (!httpContext.Request.Path.Equals("/deploy", StringComparison.OrdinalIgnoreCase))
+                {
+                    return RateLimitPartition.GetNoLimiter(httpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty);
+                }
+
+                string? ip = httpContext.Connection.RemoteIpAddress?.ToString();
+                return RateLimitPartition.GetFixedWindowLimiter(ip ?? string.Empty, _ => new FixedWindowRateLimiterOptions
+                {
+                    Window = TimeSpan.FromMinutes(1),
+                    PermitLimit = 5
+                });
+            });
         });
 
         return services;

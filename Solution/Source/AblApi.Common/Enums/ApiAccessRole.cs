@@ -3,6 +3,7 @@
 public enum ApiAccessRole
 {
     Admin,
+    Deploy,
     DiscordSendToAll,
     DiscordSendToOwner,
     Log,

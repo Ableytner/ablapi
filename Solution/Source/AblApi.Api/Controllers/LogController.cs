@@ -1,6 +1,6 @@
 using AblApi.Api.Logging;
+using AblApi.Common.ControllerDtos;
 using AblApi.Core.AppJwtToken.Attributes;
-using AblApi.Core.AppLogging.Dtos;
 using AblApi.Core.AppSettings;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
