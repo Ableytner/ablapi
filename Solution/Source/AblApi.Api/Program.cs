@@ -35,6 +35,8 @@ public class Program
 
         var app = builder.Build();
 
+        app.ValidateAppSettings();
+
         // Unhandled exceptions in Development environment reply with a detailed error json response
         app.UseExceptionHandler();
 

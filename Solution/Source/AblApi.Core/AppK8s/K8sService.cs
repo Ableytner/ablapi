@@ -74,8 +74,7 @@ public class K8sService(ILogger<K8sService> logger, K8sAppSettings settings, IK8
     {
         foreach (var entry in _settings.DeployTargets)
         {
-            var slash = entry.IndexOf('/');
-            if (slash <= 0 || slash == entry.Length - 1)
+            if (!DeployTargetsValidator.TryParse(entry, out var ns, out var deployment))
             {
                 _logger.LogWarning(
                     "RestartDeploymentAsync: allowlist entry '{Entry}' is malformed; expected 'namespace/deployment'.",
@@ -83,10 +82,9 @@ public class K8sService(ILogger<K8sService> logger, K8sAppSettings settings, IK8
                 continue;
             }
 
-            var deployment = entry[(slash + 1)..];
             if (string.Equals(deployment, name, StringComparison.OrdinalIgnoreCase))
             {
-                return (entry[..slash], deployment);
+                return (ns, deployment);
             }
         }
 
