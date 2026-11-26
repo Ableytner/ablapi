@@ -10,14 +10,6 @@ public class K8sAppSettings
 
     public string CaPath { get; set; } = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt";
 
-    public List<DeployTarget> DeployTargets { get; set; } = [];
-}
-
-public class DeployTarget
-{
-    public string Name { get; set; } = string.Empty;
-
-    public string Namespace { get; set; } = string.Empty;
-
-    public string Deployment { get; set; } = string.Empty;
+    // of the form "namespace/deployment", CI sends only "deployment"
+    public List<string> DeployTargets { get; set; } = [];
 }

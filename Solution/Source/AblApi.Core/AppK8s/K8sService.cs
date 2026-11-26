@@ -14,16 +14,15 @@ public class K8sService(ILogger<K8sService> logger, K8sAppSettings settings, IK8
 
     public async Task RestartDeploymentAsync(string name, CancellationToken cancellationToken = default)
     {
-        var target = _settings.DeployTargets
-            .FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase));
+        var target = FindTarget(name);
 
-        if (target is null
-            || string.IsNullOrWhiteSpace(target.Namespace)
-            || string.IsNullOrWhiteSpace(target.Deployment))
+        if (target is null)
         {
             _logger.LogWarning("RestartDeploymentAsync: '{Name}' is not a registered allowlist target.", name);
             throw new KeyNotFoundException($"Deployment target '{name}' is not allowed.");
         }
+
+        var (ns, deployment) = target.Value;
 
         var restartedAt = DateTime.UtcNow.ToString("o");
         var patch = JsonSerializer.Serialize(new
@@ -43,15 +42,15 @@ public class K8sService(ILogger<K8sService> logger, K8sAppSettings settings, IK8
             }
         });
 
-        var url = $"/apis/apps/v1/namespaces/{target.Namespace}/deployments/{target.Deployment}";
+        var url = $"/apis/apps/v1/namespaces/{ns}/deployments/{deployment}";
         using var request = new HttpRequestMessage(new HttpMethod("PATCH"), url)
         {
             Content = new StringContent(patch, Encoding.UTF8, "application/strategic-merge-patch+json")
         };
 
         _logger.LogInformation(
-            "RestartDeploymentAsync: patching {Namespace}/{Deployment} (name={Name}) with restartedAt={RestartedAt}",
-            target.Namespace, target.Deployment, name, restartedAt);
+            "RestartDeploymentAsync: patching {Namespace}/{Deployment} with restartedAt={RestartedAt}",
+            ns, deployment, restartedAt);
 
         using var response = await _httpClient.SendAsync(request, cancellationToken);
 
@@ -60,22 +59,45 @@ public class K8sService(ILogger<K8sService> logger, K8sAppSettings settings, IK8
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogError(
                 "RestartDeploymentAsync: k8s API returned {StatusCode} for {Namespace}/{Deployment}: {Body}",
-                (int)response.StatusCode, target.Namespace, target.Deployment, body);
+                (int)response.StatusCode, ns, deployment, body);
             throw new InvalidOperationException($"Kubernetes API returned {(int)response.StatusCode} while restarting '{name}'.");
         }
 
         _logger.LogInformation(
-            "RestartDeploymentAsync: successfully restarted {Namespace}/{Deployment} (name={Name}).",
-            target.Namespace, target.Deployment, name);
+            "RestartDeploymentAsync: successfully restarted {Namespace}/{Deployment}.",
+            ns, deployment);
 
-        await NotifyDeployAsync(name, target, cancellationToken);
+        await NotifyDeployAsync(name, ns, deployment, cancellationToken);
     }
 
-    private async Task NotifyDeployAsync(string name, DeployTarget target, CancellationToken cancellationToken)
+    private (string Namespace, string Deployment)? FindTarget(string name)
+    {
+        foreach (var entry in _settings.DeployTargets)
+        {
+            var slash = entry.IndexOf('/');
+            if (slash <= 0 || slash == entry.Length - 1)
+            {
+                _logger.LogWarning(
+                    "RestartDeploymentAsync: allowlist entry '{Entry}' is malformed; expected 'namespace/deployment'.",
+                    entry);
+                continue;
+            }
+
+            var deployment = entry[(slash + 1)..];
+            if (string.Equals(deployment, name, StringComparison.OrdinalIgnoreCase))
+            {
+                return (entry[..slash], deployment);
+            }
+        }
+
+        return null;
+    }
+
+    private async Task NotifyDeployAsync(string name, string ns, string deployment, CancellationToken cancellationToken)
     {
         var sent = await _nikoBotService.SendSuccessAsync(
             "Deploy",
-            $"Deployed `{name}` ({target.Namespace}/{target.Deployment}) from CI",
+            $"Deployed `{name}` ({ns}/{deployment}) from CI",
             "owner",
             cancellationToken: cancellationToken);
 
