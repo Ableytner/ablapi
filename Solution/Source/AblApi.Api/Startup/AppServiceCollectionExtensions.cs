@@ -5,6 +5,7 @@ using AblApi.Core.AppK8s;
 using AblApi.Core.AppNikoBot;
 using AblApi.Core.AppWillhaben;
 using AblApi.GTNH;
+using k8s;
 
 namespace AblApi.Api.Startup;
 
@@ -57,7 +58,7 @@ internal static class AppServiceCollectionExtensions
         services.AddTransient<IGTNewHorizonsService, GTNewHorizonsService>();
         services.AddTransient<IGTNHService, GTNHService>();
 
-        services.AddSingleton<IK8sHttpClient, K8sHttpClient>();
+        services.AddSingleton<IKubernetes>(_ => new Kubernetes(KubernetesClientConfiguration.InClusterConfig()));
         services.AddTransient<IK8sService, K8sService>();
 
         services.AddTransient<INikoBotService, NikoBotService>();

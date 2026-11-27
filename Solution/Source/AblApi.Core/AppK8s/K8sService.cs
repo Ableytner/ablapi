@@ -1,15 +1,16 @@
-using System.Text;
 using System.Text.Json;
 using AblApi.Core.AppNikoBot;
+using k8s;
+using k8s.Models;
 using Microsoft.Extensions.Logging;
 
 namespace AblApi.Core.AppK8s;
 
-public class K8sService(ILogger<K8sService> logger, K8sAppSettings settings, IK8sHttpClient httpClient, INikoBotService nikoBotService) : IK8sService
+public class K8sService(ILogger<K8sService> logger, K8sAppSettings settings, IKubernetes kubernetes, INikoBotService nikoBotService) : IK8sService
 {
     private readonly ILogger<K8sService> _logger = logger;
     private readonly K8sAppSettings _settings = settings;
-    private readonly IK8sHttpClient _httpClient = httpClient;
+    private readonly IKubernetes _kubernetes = kubernetes;
     private readonly INikoBotService _nikoBotService = nikoBotService;
 
     public async Task RestartDeploymentAsync(string name, CancellationToken cancellationToken = default)
@@ -42,26 +43,15 @@ public class K8sService(ILogger<K8sService> logger, K8sAppSettings settings, IK8
             }
         });
 
-        var url = $"/apis/apps/v1/namespaces/{ns}/deployments/{deployment}";
-        using var request = new HttpRequestMessage(new HttpMethod("PATCH"), url)
-        {
-            Content = new StringContent(patch, Encoding.UTF8, "application/strategic-merge-patch+json")
-        };
-
         _logger.LogInformation(
             "RestartDeploymentAsync: patching {Namespace}/{Deployment} with restartedAt={RestartedAt}",
             ns, deployment, restartedAt);
 
-        using var response = await _httpClient.SendAsync(request, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogError(
-                "RestartDeploymentAsync: k8s API returned {StatusCode} for {Namespace}/{Deployment}: {Body}",
-                (int)response.StatusCode, ns, deployment, body);
-            throw new InvalidOperationException($"Kubernetes API returned {(int)response.StatusCode} while restarting '{name}'.");
-        }
+        await _kubernetes.AppsV1.PatchNamespacedDeploymentAsync(
+            new V1Patch(patch, V1Patch.PatchType.StrategicMergePatch),
+            deployment,
+            ns,
+            cancellationToken: cancellationToken);
 
         _logger.LogInformation(
             "RestartDeploymentAsync: successfully restarted {Namespace}/{Deployment}.",
