@@ -1,12 +1,12 @@
 using System.Text.Json.Serialization;
 
-namespace AblApi.Core.AppLogging.Dtos;
+namespace AblApi.Common.ControllerDtos;
 
 public class LogMessageDto
 {
     [JsonPropertyName("log_level")]
     public required string LogLevel { get; set; }
-    
+
     [JsonPropertyName("sender")]
     public required string Sender { get; set; }
 

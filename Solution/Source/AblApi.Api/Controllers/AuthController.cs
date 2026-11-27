@@ -5,6 +5,7 @@ using AblApi.Core.AppJwtToken;
 using AblApi.Core.AppJwtToken.Dtos;
 using AblApi.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace AblApi.Api.Controllers;
 
@@ -17,6 +18,7 @@ public class AuthController(ILogger<AuthController> logger, IAblRepository ablRe
     private readonly IJwtTokenService _jwtTokenService = jwtTokenService;
 
     [HttpPost]
+    [EnableRateLimiting("auth")]
     [EndpointSummary("Authenticate an ApiUser and issue a JWT token")]
     [EndpointDescription("Expects the Authorization header to contain userId:password encoded in base64, e.g. \"Authorization: Basic <encoded string>\".")]
     [ProducesResponseType(typeof(JwtTokenDto), StatusCodes.Status200OK)]

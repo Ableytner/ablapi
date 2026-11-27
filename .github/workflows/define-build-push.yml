@@ -87,3 +87,19 @@ jobs:
         push: ${{ inputs.push_image }}
         tags: ${{ steps.meta_sqltool.outputs.tags }}
         labels: ${{ steps.meta_sqltool.outputs.labels }}
+
+  deploy-api:
+    needs: build-push
+    if: ${{ inputs.push_image }}
+    uses: ./.github/workflows/define-deploy.yml
+    with:
+      deploy_name: ablapi
+    secrets: inherit
+
+  deploy-sqltool:
+    needs: build-push
+    if: ${{ inputs.push_image }}
+    uses: ./.github/workflows/define-deploy.yml
+    with:
+      deploy_name: ablapi-sqltool
+    secrets: inherit
