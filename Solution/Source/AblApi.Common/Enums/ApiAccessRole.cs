@@ -7,5 +7,6 @@ public enum ApiAccessRole
     DiscordSendToAll,
     DiscordSendToOwner,
     Log,
-    WillhabenConfig
+    WillhabenConfig,
+    Spotify
 }

@@ -43,7 +43,7 @@ public class GTNHControllerCacheTests
         await controller.GetLatestDailyVersion();
 
         // Assert
-        await gtnhService.DidNotReceive().GetLatestDailyVersionAsync(null);
+        await gtnhService.DidNotReceive().GetLatestDailyVersionAsync(null, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -68,6 +68,6 @@ public class GTNHControllerCacheTests
         await controller.GetLatestStableVersion();
 
         // Assert
-        await gtnhService.DidNotReceive().GetLatestStableVersionAsync();
+        await gtnhService.DidNotReceive().GetLatestStableVersionAsync(TestContext.Current.CancellationToken);
     }
 }
